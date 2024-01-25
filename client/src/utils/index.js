@@ -79,7 +79,7 @@ export const formatWithCommas = n => n.toString().replace(/\B(?=(\d{3})+(?!\d))/
 
 // Higher-order function for async/await error handling
 export const catchErrors = fn =>
-  function(...args) {
+  function (...args) {
     return fn(...args).catch(err => {
       console.error(err);
     });

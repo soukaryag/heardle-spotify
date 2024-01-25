@@ -163,7 +163,8 @@ const Nav = () => (
       <a
         href="https://github.com/soukaryag/heardle-spotify"
         target="_blank"
-        rel="noopener noreferrer">
+        rel="noopener noreferrer"
+      >
         <IconGithub />
       </a>
     </Github>

@@ -153,7 +153,8 @@ const Track = props => {
                 <a
                   href={track.album.external_urls.spotify}
                   target="_blank"
-                  rel="noopener noreferrer">
+                  rel="noopener noreferrer"
+                >
                   {track.album.name}
                 </a>{' '}
                 &middot; {getYear(track.album.release_date)}
@@ -161,7 +162,8 @@ const Track = props => {
               <PlayTrackButton
                 href={track.external_urls.spotify}
                 target="_blank"
-                rel="noopener noreferrer">
+                rel="noopener noreferrer"
+              >
                 Play on Spotify
               </PlayTrackButton>
             </Info>
@@ -217,7 +219,8 @@ const Track = props => {
               <DescriptionLink
                 href="https://developer.spotify.com/documentation/web-api/reference/tracks/get-audio-features/"
                 target="_blank"
-                rel="noopener noreferrer">
+                rel="noopener noreferrer"
+              >
                 Full Description of Audio Features
               </DescriptionLink>
             </AudioFeatures>

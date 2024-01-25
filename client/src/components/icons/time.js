@@ -8,7 +8,8 @@ const IconTime = () => (
     y="0px"
     width="30px"
     height="29px"
-    viewBox="0 0 510 510">
+    viewBox="0 0 510 510"
+  >
     <title>Time</title>
     <g>
       <g id="history">

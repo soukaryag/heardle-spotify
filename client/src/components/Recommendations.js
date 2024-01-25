@@ -123,7 +123,8 @@ const Recommendations = props => {
             <OpenButton
               href={`https://open.spotify.com/playlist/${recPlaylistId}`}
               target="_blank"
-              rel="noopener noreferrer">
+              rel="noopener noreferrer"
+            >
               Open in Spotify
             </OpenButton>
           ) : (

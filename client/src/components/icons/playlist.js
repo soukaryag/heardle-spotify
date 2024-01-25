@@ -7,7 +7,8 @@ const IconPlaylist = () => (
     x="0px"
     y="0px"
     viewBox="0 0 405.333 405.333"
-    xmlSpace="preserve">
+    xmlSpace="preserve"
+  >
     <g>
       <rect x="0" y="53.333" width="256" height="42.667" />
       <rect x="0" y="138.667" width="256" height="42.667" />

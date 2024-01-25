@@ -37,7 +37,7 @@ const Mask = styled.div`
     width: 25px;
   }
 `;
-const TrackContainer = styled.a` 
+const TrackContainer = styled.a`
   display: grid;
   grid-template-columns: auto 1fr;
   border-radius: 5px;
@@ -85,7 +85,9 @@ const TrackItem = ({ track, onClick }) => (
       {track.album ? (
         <div>
           <TrackArtwork>
-            {track.album?.images?.length && <img src={track.album.images[2].url} alt="Album Artwork" />}
+            {track.album?.images?.length && (
+              <img src={track.album.images[2].url} alt="Album Artwork" />
+            )}
             <Mask>
               <IconInfo />
             </Mask>

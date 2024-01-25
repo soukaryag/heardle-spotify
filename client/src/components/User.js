@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from '@reach/router';
-import { getUserInfo, getSearchArists, getAllTracksByArtist, logout,  } from '../spotify';
+import { getUserInfo, getSearchArists, getAllTracksByArtist, logout } from '../spotify';
 import { catchErrors } from '../utils';
 
 import { IconUser, IconInfo } from './icons';
@@ -208,19 +208,19 @@ const User = () => {
     catchErrors(fetchData());
   }, []);
 
-  const updateSearchText = (text) => {
+  const updateSearchText = text => {
     if (!text) {
-      setArtistsSearched(null)
-      return
+      setArtistsSearched(null);
+      return;
     }
 
     const fetchDataArtists = async () => {
       const { data } = await getSearchArists(text);
-      const { artists } = data
-      setArtistsSearched(artists)
+      const { artists } = data;
+      setArtistsSearched(artists);
     };
     catchErrors(fetchDataArtists());
-  }
+  };
 
   return (
     <React.Fragment>
@@ -232,8 +232,7 @@ const User = () => {
                 <img src={user.images[1].url} alt="avatar" />
               ) : user.images.length > 0 ? (
                 <img src={user.images[0].url} alt="avatar" />
-              )
-              : (
+              ) : (
                 <NoAvatar>
                   <IconUser />
                 </NoAvatar>
@@ -258,29 +257,34 @@ const User = () => {
             </Stats>
             <LogoutButton onClick={logout}>Logout</LogoutButton>
           </Header>
-          
+
           <SpotifySearchContainer>
-            <SpotifySearch placeholder='Who do you want to heardle?' onChange={e => updateSearchText(e.target.value)} />
+            <SpotifySearch
+              placeholder="Who do you want to heardle?"
+              onChange={e => updateSearchText(e.target.value)}
+            />
           </SpotifySearchContainer>
 
           <ArtistsContainer>
-            {artistsSearched ? (
-              artistsSearched.items.map(({ id, external_urls, images, name }, i) => (
-                id && external_urls && images && images.length > 0 && name ? (
-                  <Artist key={i}>
-                    <ArtistArtwork to={`/play/${id}`}>
-                      {images.length > 1 ? <img src={images[1].url} alt="Artist" /> : images.length > 0 ? <img src={images[0].url} alt="Artist" /> : null}
-                      <Mask>
-                        <IconInfo />
-                      </Mask>
-                    </ArtistArtwork>
-                    <ArtistName>
-                      {name}
-                    </ArtistName>
-                  </Artist>
-                ) : null
-              ))
-            ) : null}
+            {artistsSearched
+              ? artistsSearched.items.map(({ id, external_urls, images, name }, i) =>
+                  id && external_urls && images && images.length > 0 && name ? (
+                    <Artist key={i}>
+                      <ArtistArtwork to={`/play/${id}`}>
+                        {images.length > 1 ? (
+                          <img src={images[1].url} alt="Artist" />
+                        ) : images.length > 0 ? (
+                          <img src={images[0].url} alt="Artist" />
+                        ) : null}
+                        <Mask>
+                          <IconInfo />
+                        </Mask>
+                      </ArtistArtwork>
+                      <ArtistName>{name}</ArtistName>
+                    </Artist>
+                  ) : null,
+                )
+              : null}
           </ArtistsContainer>
         </Main>
       ) : (

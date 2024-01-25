@@ -30,7 +30,8 @@ const IconLoader = () => (
       width="24px"
       height="30px"
       viewBox="0 0 24 30"
-      xmlSpace="preserve">
+      xmlSpace="preserve"
+    >
       <rect x="0" y="10" width="4" height="10" fill="#333" opacity="0.2">
         <animate
           attributeName="opacity"

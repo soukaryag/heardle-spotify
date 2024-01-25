@@ -261,58 +261,55 @@ export const getTrackAudioFeatures = trackId =>
 export const getSearchArists = artistName =>
   axios.get(`https://api.spotify.com/v1/search?q=${artistName}&type=artist&limit=5`, { headers });
 
-export const getRandomSongByArtist = () => {
+export const getRandomSongByArtist = () => {};
 
-}
-
-export const getAllAlbumsByArtist = (artistId) =>
+export const getAllAlbumsByArtist = artistId =>
   axios.get(`https://api.spotify.com/v1/artists/${artistId}/albums`, { headers });
 
-  /**
-   * Get all tracks for a given album
-   * https://developer.spotify.com/documentation/web-api/reference/get-an-albums-tracks
-   */
-export const getAllTracksByAlbum = (albumId) =>
+/**
+ * Get all tracks for a given album
+ * https://developer.spotify.com/documentation/web-api/reference/get-an-albums-tracks
+ */
+export const getAllTracksByAlbum = albumId =>
   axios.get(`https://api.spotify.com/v1/albums/${albumId}/tracks`, { headers });
 
-export const getAllTracksByArtist = async (artistId) => {
-  let results = []
+export const getAllTracksByArtist = async artistId => {
+  let results = [];
   const { data } = await getAllAlbumsByArtist(artistId);
   data.items.forEach(async ({ id, name }) => {
     const { data } = await getAllTracksByAlbum(id);
     data.items.forEach(({ id, name }) => {
       results.push({ id, name });
-    })
-  })
-}
+    });
+  });
+};
 
 export const startPlayback = async (trackId, deviceId) => {
   const url = `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`;
-  const data = JSON.stringify({ 
+  const data = JSON.stringify({
     uris: [`spotify:track:${trackId}`],
     position_ms: 0,
-    device_id: '11b2af95a53bface4fd8e6b97100938976ae0599'
+    device_id: '11b2af95a53bface4fd8e6b97100938976ae0599',
   });
-  axios({ 
-    method: 'put', 
-    url, 
-    headers,
-    data
-  });
-}
-
-export const pausePlayback = async (deviceId) => {
-  const url = `https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`;
-  await axios({ 
+  axios({
     method: 'put',
     url,
-    headers
+    headers,
+    data,
   });
-}
+};
+
+export const pausePlayback = async deviceId => {
+  const url = `https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`;
+  await axios({
+    method: 'put',
+    url,
+    headers,
+  });
+};
 
 export const getAllDevices = async () =>
   await axios.get(`https://api.spotify.com/v1/me/player/devices`, { headers });
-
 
 export const getUserInfo = () =>
   axios

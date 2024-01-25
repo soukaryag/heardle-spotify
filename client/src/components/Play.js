@@ -2,8 +2,15 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ConfettiExplosion from 'react-confetti-explosion';
 import { formatWithCommas, catchErrors } from '../utils';
-import { getAllAlbumsByArtist, getAllTracksByAlbum, getArtist, startPlayback, pausePlayback, getAllDevices } from '../spotify';
-import { CountdownCircleTimer } from 'react-countdown-circle-timer'
+import {
+  getAllAlbumsByArtist,
+  getAllTracksByAlbum,
+  getArtist,
+  startPlayback,
+  pausePlayback,
+  getAllDevices,
+} from '../spotify';
+import { CountdownCircleTimer } from 'react-countdown-circle-timer';
 
 import Loader from './Loader';
 import TrackItem from './TrackItem';
@@ -11,13 +18,13 @@ import TrackItem from './TrackItem';
 import styled from 'styled-components/macro';
 import { theme, mixins, media, Main } from '../styles';
 import {
-    IconPlay,
-    IconMicrophone,
-    IconReset,
-    IconComputer,
-    IconPhone,
-    IconSpeaker,
-    IconExternal,
+  IconPlay,
+  IconMicrophone,
+  IconReset,
+  IconComputer,
+  IconPhone,
+  IconSpeaker,
+  IconExternal,
 } from './icons';
 import { Link } from '@reach/router';
 const { colors, fontSizes, fonts, spacing } = theme;
@@ -32,10 +39,10 @@ const TrackContainer = styled.div`
   `};
 `;
 const PageContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
 `;
 const ArtistContainer = styled(Main)`
   ${mixins.flexTop};
@@ -43,27 +50,27 @@ const ArtistContainer = styled(Main)`
   min-height: 10%;
 `;
 const Artwork = styled.div`
+  border-radius: 100%;
+  img {
+    object-fit: cover;
     border-radius: 100%;
-    img {
-        object-fit: cover;
-        border-radius: 100%;
-        width: 120px;
-        height: 120px;
-        ${media.tablet`
+    width: 120px;
+    height: 120px;
+    ${media.tablet`
         width: 60px;
         height: 60px;
         `};
-    }
+  }
 `;
 const ArtistName = styled.a`
-    display: inline;
-    border-bottom: 1px solid transparent;
-    font-weight: 500;
-    &:hover {
-        color: ${colors.green}
-    }
-    font-size: 30px;
-    ${media.tablet`
+  display: inline;
+  border-bottom: 1px solid transparent;
+  font-weight: 500;
+  &:hover {
+    color: ${colors.green};
+  }
+  font-size: 30px;
+  ${media.tablet`
         font-size: 5vw;
     `};
 `;
@@ -76,63 +83,63 @@ const Stats = styled.div`
 `;
 const Stat = styled.div``;
 const Number = styled.div`
-    color: ${colors.blue};
-    font-weight: 500;
-    font-size: ${fontSizes.sm};
-    text-transform: capitalize;
-    ${media.tablet`
+  color: ${colors.blue};
+  font-weight: 500;
+  font-size: ${fontSizes.sm};
+  text-transform: capitalize;
+  ${media.tablet`
         font-size: ${fontSizes.sm};
     `};
 `;
 const Genre = styled.div`
-    font-size: ${fontSizes.sm};
+  font-size: ${fontSizes.sm};
 `;
 const NumLabel = styled.p`
-    color: ${colors.lightGrey};
-    font-size: ${fontSizes.xs};
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-top: ${spacing.xs};
+  color: ${colors.lightGrey};
+  font-size: ${fontSizes.xs};
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: ${spacing.xs};
 `;
 
 const GuessContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
 `;
 const GuessInput = styled.input`
-    border: 2px solid ${colors.darkGrey};
-    position: relative;
-    z-index: 1;
-    height: 40px;
-    border-radius: 25px;
-    width: 100%;
-    min-width: 300px;
-    padding-left: 20px;
-    padding-right: 20px;
-    margin-bottom: 10px;
-    font-family: ${fonts.primary}!important;
-    font-size: ${fontSizes.smd};
-    background-color: ${colors.darkGrey};
-    color: white;
-    &:focus {
-        border: 2px solid ${colors.white};
-    }
-    ${media.tablet`
+  border: 2px solid ${colors.darkGrey};
+  position: relative;
+  z-index: 1;
+  height: 40px;
+  border-radius: 25px;
+  width: 100%;
+  min-width: 300px;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin-bottom: 10px;
+  font-family: ${fonts.primary}!important;
+  font-size: ${fontSizes.smd};
+  background-color: ${colors.darkGrey};
+  color: white;
+  &:focus {
+    border: 2px solid ${colors.white};
+  }
+  ${media.tablet`
         min-width: 200px;
     `};
-    ${media.phablet`
+  ${media.phablet`
         min-width: 100px;
     `};
 `;
 
 const TracksContainer = styled.ul`
-    display: flex;
-    flex-direction: column;
-    width: 500px;
-    margin-top: 50px;
-    ${media.tablet`
+  display: flex;
+  flex-direction: column;
+  width: 500px;
+  margin-top: 50px;
+  ${media.tablet`
         width: 300px;
     `}
 `;
@@ -199,11 +206,11 @@ const SecondaryButton = styled(Link)`
 `;
 
 const DevicesContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    background-color: ${colors.darkGrey};
-    padding: 20px;
-    border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  background-color: ${colors.darkGrey};
+  padding: 20px;
+  border-radius: 10px;
 `;
 
 const DeviceContainer = styled.a`
@@ -239,288 +246,373 @@ const DeviceName = styled.div`
   margin: auto 10px;
 `;
 const DevicesHeader = styled.a`
-    display: inline;
-    font-weight: 700;
-    font-size: 18px;
-    padding: 10px;
-    ${media.tablet`
+  display: inline;
+  font-weight: 700;
+  font-size: 18px;
+  padding: 10px;
+  ${media.tablet`
         font-size: 2vw;
     `};
 `;
 
 const Play = props => {
-    const { artistId } = props;
+  const { artistId } = props;
 
-    const [tracks, setTracks] = useState([]);
-    const [artist, setArtist] = useState(null);
-    const [playing, setPlaying] = useState(false);
-    const [currentTrack, setCurrentTrack] = useState(null);
-    const [deviceId, setDeviceId] = useState(null);
-    const [devicesAvailable, setDevicesAvailable] = useState([]);
+  const [tracks, setTracks] = useState([]);
+  const [artist, setArtist] = useState(null);
+  const [playing, setPlaying] = useState(false);
+  const [currentTrack, setCurrentTrack] = useState(null);
+  const [deviceId, setDeviceId] = useState(null);
+  const [devicesAvailable, setDevicesAvailable] = useState([]);
 
-    const timeLimitsArray = [1500, 2000, 4000, 8000, 16000, 32000]
-    const [guesses, setGuesses] = useState([]);
-    const [displayedTracks, setDisplayedTracks] = useState(null);
-    const [trackPlaying, setTrackPlaying] = useState(false);
-    const [winner, setWinner] = useState(false);
-    const [loser, setLoser] = useState(false);
+  const timeLimitsArray = [1500, 2000, 4000, 8000, 16000, 32000];
+  const [guesses, setGuesses] = useState([]);
+  const [displayedTracks, setDisplayedTracks] = useState(null);
+  const [trackPlaying, setTrackPlaying] = useState(false);
+  const [winner, setWinner] = useState(false);
+  const [loser, setLoser] = useState(false);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const { data } = await getAllAlbumsByArtist(artistId);
-            data.items.forEach(async ({ id, images, name }) => {
-                const { data } = await getAllTracksByAlbum(id);
-                let additionalTracks = data.items ?? [];
-                additionalTracks = additionalTracks.map(obj => ({ ...obj, album: { id, images, name } }))
-                setTracks(oldTracks => [...oldTracks, ...additionalTracks] );
-            })
-        };
-        catchErrors(fetchData());
-    }, [artistId]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data } = await getAllAlbumsByArtist(artistId);
+      data.items.forEach(async ({ id, images, name }) => {
+        const { data } = await getAllTracksByAlbum(id);
+        let additionalTracks = data.items ?? [];
+        additionalTracks = additionalTracks.map(obj => ({ ...obj, album: { id, images, name } }));
+        setTracks(oldTracks => [...oldTracks, ...additionalTracks]);
+      });
+    };
+    catchErrors(fetchData());
+  }, [artistId]);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const { data } = await getArtist(artistId);
-            setArtist(data);
-        };
-        catchErrors(fetchData());
-    }, [artistId]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data } = await getArtist(artistId);
+      setArtist(data);
+    };
+    catchErrors(fetchData());
+  }, [artistId]);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const { data } = await getAllDevices();
-            setDevicesAvailable(data.devices ?? [])
-            if (data.devices.length > 0) {
-                setDeviceId(data.devices[0].id);
-            }
-        };
-        catchErrors(fetchData());
-    }, [])
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data } = await getAllDevices();
+      setDevicesAvailable(data.devices ?? []);
+      if (data.devices.length > 0) {
+        setDeviceId(data.devices[0].id);
+      }
+    };
+    catchErrors(fetchData());
+  }, []);
 
-    const startGame = () => {
-        const random = Math.floor(Math.random() * tracks.length);
-        setCurrentTrack(tracks[random]);
-        setPlaying(true);
-        setWinner(false);
-        setLoser(false);
-        pausePlayback(deviceId);
-        setTrackPlaying(false);
-        setDisplayedTracks(false);
-        setGuesses([]);
-        for (let i = 0; i < 5; i++) {
-            let inputElement = document.getElementById(`guess${i}`);
-            if (inputElement) {
-                inputElement.setAttribute(`style", "background-color: ${colors.darkGrey}; border: 2px solid ${colors.darkGrey}`);
-            }
-        }
+  const startGame = () => {
+    const random = Math.floor(Math.random() * tracks.length);
+    setCurrentTrack(tracks[random]);
+    setPlaying(true);
+    setWinner(false);
+    setLoser(false);
+    pausePlayback(deviceId);
+    setTrackPlaying(false);
+    setDisplayedTracks(false);
+    setGuesses([]);
+    for (let i = 0; i < 5; i++) {
+      let inputElement = document.getElementById(`guess${i}`);
+      if (inputElement) {
+        inputElement.setAttribute(
+          `style", "background-color: ${colors.darkGrey}; border: 2px solid ${colors.darkGrey}`,
+        );
+      }
+    }
+  };
+
+  const displayTracks = text => {
+    if (!text) {
+      setDisplayedTracks([]);
+      return;
     }
 
-    const displayTracks = (text) => {
-        if (!text) {
-            setDisplayedTracks([])
-            return
+    const matchedTracks = tracks.filter(
+      function (el) {
+        if (this.count < 7 && el.name.toLowerCase().indexOf(text) !== -1) {
+          this.count++;
+          return true;
         }
-
-        const matchedTracks = tracks.filter(function (el) {
-            if (this.count < 7 && el.name.toLowerCase().indexOf(text) !== -1) {
-                this.count++;
-                return true;
-            }
-            return false;
-        }, {count: 0});
-
-        setDisplayedTracks(matchedTracks);
-    }
-
-    const playSong = (timeLimit) => {
-        setTrackPlaying(true);
-        startPlayback(currentTrack.id, deviceId);
-        setTimeout( function() { pausePlayback(deviceId); setTrackPlaying(false); }, timeLimit ?? timeLimitsArray[guesses.length]);
-    }
-
-    const checkGuess = (track) => {
-        const currId = guesses.length
-        const inputElement = document.getElementById(`guess${currId}`);
-        inputElement.value = track.name;
-
-        console.log(track.name, currentTrack.name)
-
-        setDisplayedTracks([])
-
-        if (track.name === currentTrack.name || currentTrack.name.toLowerCase().indexOf(track.name) !== -1 || track.name.toLowerCase().indexOf(currentTrack.name) !== -1) {
-            // got it!
-            inputElement.setAttribute("style", "background-color: #1DB954; border: 2px solid #1DB954");
-            startPlayback(currentTrack.id, deviceId);
-            setDisplayedTracks([currentTrack]);
-            setWinner(true);
-        } else if (track.album?.name === currentTrack.album.name) {
-            // same album
-            inputElement.setAttribute("style", "background-color: #f6cd61; border: 2px solid #f6cd61");
-            playSong(timeLimitsArray[guesses.length + 1]);
-            setGuesses(currGuesses => [...currGuesses, track.name])
-        } else {
-            // wrong
-            inputElement.setAttribute("style", "background-color: #69202f; border: 2px solid #69202f");
-            playSong(timeLimitsArray[guesses.length + 1]);
-            if ( guesses.length + 1 >= 5 ) {
-                console.log('You lost!');
-                setDisplayedTracks([currentTrack]);
-                setLoser(true);
-            }
-
-            setGuesses(currGuesses => [...currGuesses, track.name])
-
-            
-        }
-        
-        console.log(guesses)
-        
-    }
-
-    return (
-        <React.Fragment>
-        
-            { tracks.length > 0 && artist ? (
-                <PageContainer>
-                    <ArtistContainer>
-                        <Artwork>
-                            <img src={artist.images[0].url} alt="Artist Artwork" />
-                        </Artwork>
-                        <div style={{marginLeft: spacing.md, paddingTop: spacing.sm}}>
-                            <ArtistName href={artist.external_urls.spotify} target="_blank" rel="noopener noreferrer">{artist.name}</ArtistName>
-                            <Stats>
-                                <Stat>
-                                    <Number>{formatWithCommas(artist.followers.total)}</Number>
-                                    <NumLabel>Followers</NumLabel>
-                                </Stat>
-                                {artist.genres.length > 0 && (
-                                    <Stat>
-                                    <Number>
-                                        <Genre key={artist.genres[0]}>{artist.genres[0]}</Genre>
-                                    </Number>
-                                    <NumLabel>Genres</NumLabel>
-                                    </Stat>
-                                )}
-                                {artist.popularity && (
-                                    <Stat>
-                                    <Number>{artist.popularity}%</Number>
-                                    <NumLabel>Popularity</NumLabel>
-                                    </Stat>
-                                )}
-                            </Stats>
-                        </div>
-                    </ArtistContainer>
-
-                    { playing && currentTrack && deviceId ? (
-                        <div style={{ textAlign: 'center', maxWidth: '60%', overflow: 'auto', display: 'inline-block' }}>
-                            
-                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '20px' }}>
-                                { (winner || loser) && (
-                                    <SecondaryButton to={`/track/${currentTrack.id}`}>
-                                        <IconMicrophone />
-                                    </SecondaryButton>
-                                )}
-                                
-                                <PlayButton onClick={e => playSong()}>
-                                    <IconPlay />
-                                    { winner && <ConfettiExplosion duration={5000} particleCount={200} onComplete={e => console.log('DONE!')} /> }
-                                </PlayButton>
-
-                                { (winner || loser) && (
-                                    <SecondaryButton to={`/play/${artist.id}`} onClick={startGame}>
-                                        <IconReset />
-                                    </SecondaryButton>
-                                )}
-                            </div>
-                            
-
-                            <GuessContainer>
-                                <GuessInput id='guess0' key='guess0' autoComplete="off" placeholder='Type your guess...' onChange={e => displayTracks(e.target.value.toLowerCase())} disabled={guesses.length > 0} />
-                                { guesses.length > 0 ? (
-                                    <GuessInput id='guess1' key='guess1' autoComplete="off" placeholder='Type your guess...' onChange={e => displayTracks(e.target.value.toLowerCase())} disabled={guesses.length > 1} />
-                                ) : null } 
-                                { guesses.length > 1 ? (
-                                    <GuessInput id='guess2' key='guess2' autoComplete="off" placeholder='Type your guess...' onChange={e => displayTracks(e.target.value.toLowerCase())} disabled={guesses.length > 2} />
-                                ) : null } 
-                                { guesses.length > 2 ? (
-                                    <GuessInput id='guess3' key='guess3' autoComplete="off" placeholder='Type your guess...' onChange={e => displayTracks(e.target.value.toLowerCase())} disabled={guesses.length > 3} />
-                                ) : null } 
-                                { guesses.length > 3 ? (
-                                    <GuessInput id='guess4' key='guess4' autoComplete="off" placeholder='Type your guess...' onChange={e => displayTracks(e.target.value.toLowerCase())} disabled={guesses.length > 4} />
-                                ) : null }
-                            </GuessContainer>
-            
-                            <TracksContainer>
-                                {displayedTracks ? (
-                                    displayedTracks.map((track, i) => <TrackItem track={track} onClick={e => {
-                                        if (!winner && !loser) {
-                                            checkGuess(track)
-                                        }
-                                    }} key={i} />)
-                                ) : null}
-                            </TracksContainer>
-                        </div>
-                    ) : (
-                        <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-                            <DevicesContainer>
-                                <DevicesHeader>Select a device</DevicesHeader>
-                                { devicesAvailable.length > 0 ? (
-                                    devicesAvailable.map((device, i) => (
-                                        device.id && device.name ? (
-                                            <DeviceContainer 
-                                                key={device.id} 
-                                                onClick={e => setDeviceId(device.id)}
-                                                style={{ backgroundColor: deviceId === device.id ? colors.green : null }}
-                                            >
-                                                { device.type === 'Computer' ? (
-                                                    <IconComputer />
-                                                ) : device.type === 'Smartphone' ? (
-                                                    <IconPhone />
-                                                ) : device.type === 'CastAudio' ? (
-                                                    <IconSpeaker />
-                                                ) : (
-                                                    <p>?</p>
-                                                )}
-                                                
-                                                <DeviceName>{device.name}</DeviceName>
-                                            </DeviceContainer>
-                                        ) : null
-                                    ))
-                                ) : (
-                                    <div style={{ color: colors.lightGrey, paddingLeft: '18px', margin: '10px 0 20px 0'}}>
-                                        No devices available!
-                                    </div>
-                                )}
-                                <DeviceHelpContainer href={'https://support.spotify.com/us/article/spotify-connect/'} target="_blank" rel="noopener noreferrer">
-                                    <DeviceName style={{marginLeft: 0}}>Don't see your device?</DeviceName>
-                                    <div style={{color: colors.lightGrey}}>
-                                        <IconExternal />
-                                    </div>
-                                </DeviceHelpContainer>
-                                <DeviceHelpContainer href={'https://connect.spotify.com/howto'} target="_blank" rel="noopener noreferrer">
-                                    <DeviceName style={{marginLeft: 0}}>What can I connect to?</DeviceName>
-                                    <div style={{color: colors.lightGrey}}>
-                                        <IconExternal />
-                                    </div>
-                                </DeviceHelpContainer>
-                            </DevicesContainer>
-                            <StartButton onClick={e => startGame()} disabled={!deviceId}>Start Game</StartButton>
-                        </div>
-                    )}
-                    
-                    
-                </PageContainer>
-            ) : (
-                <Loader />
-            )
-        }
-        
-        </React.Fragment>
+        return false;
+      },
+      { count: 0 },
     );
+
+    setDisplayedTracks(matchedTracks);
+  };
+
+  const playSong = timeLimit => {
+    setTrackPlaying(true);
+    startPlayback(currentTrack.id, deviceId);
+    setTimeout(function () {
+      pausePlayback(deviceId);
+      setTrackPlaying(false);
+    }, timeLimit ?? timeLimitsArray[guesses.length]);
+  };
+
+  const checkGuess = track => {
+    const currId = guesses.length;
+    const inputElement = document.getElementById(`guess${currId}`);
+    inputElement.value = track.name;
+
+    console.log(track.name, currentTrack.name);
+
+    setDisplayedTracks([]);
+
+    if (
+      track.name === currentTrack.name ||
+      currentTrack.name.toLowerCase().indexOf(track.name) !== -1 ||
+      track.name.toLowerCase().indexOf(currentTrack.name) !== -1
+    ) {
+      // got it!
+      inputElement.setAttribute('style', 'background-color: #1DB954; border: 2px solid #1DB954');
+      startPlayback(currentTrack.id, deviceId);
+      setDisplayedTracks([currentTrack]);
+      setWinner(true);
+    } else if (track.album?.name === currentTrack.album.name) {
+      // same album
+      inputElement.setAttribute('style', 'background-color: #f6cd61; border: 2px solid #f6cd61');
+      playSong(timeLimitsArray[guesses.length + 1]);
+      setGuesses(currGuesses => [...currGuesses, track.name]);
+    } else {
+      // wrong
+      inputElement.setAttribute('style', 'background-color: #69202f; border: 2px solid #69202f');
+      playSong(timeLimitsArray[guesses.length + 1]);
+      if (guesses.length + 1 >= 5) {
+        console.log('You lost!');
+        setDisplayedTracks([currentTrack]);
+        setLoser(true);
+      }
+
+      setGuesses(currGuesses => [...currGuesses, track.name]);
+    }
+
+    console.log(guesses);
+  };
+
+  return (
+    <React.Fragment>
+      {tracks.length > 0 && artist ? (
+        <PageContainer>
+          <ArtistContainer>
+            <Artwork>
+              <img src={artist.images[0].url} alt="Artist Artwork" />
+            </Artwork>
+            <div style={{ marginLeft: spacing.md, paddingTop: spacing.sm }}>
+              <ArtistName
+                href={artist.external_urls.spotify}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {artist.name}
+              </ArtistName>
+              <Stats>
+                <Stat>
+                  <Number>{formatWithCommas(artist.followers.total)}</Number>
+                  <NumLabel>Followers</NumLabel>
+                </Stat>
+                {artist.genres.length > 0 && (
+                  <Stat>
+                    <Number>
+                      <Genre key={artist.genres[0]}>{artist.genres[0]}</Genre>
+                    </Number>
+                    <NumLabel>Genres</NumLabel>
+                  </Stat>
+                )}
+                {artist.popularity && (
+                  <Stat>
+                    <Number>{artist.popularity}%</Number>
+                    <NumLabel>Popularity</NumLabel>
+                  </Stat>
+                )}
+              </Stats>
+            </div>
+          </ArtistContainer>
+
+          {playing && currentTrack && deviceId ? (
+            <div
+              style={{
+                textAlign: 'center',
+                maxWidth: '60%',
+                overflow: 'auto',
+                display: 'inline-block',
+              }}
+            >
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginBottom: '20px',
+                }}
+              >
+                {(winner || loser) && (
+                  <SecondaryButton to={`/track/${currentTrack.id}`}>
+                    <IconMicrophone />
+                  </SecondaryButton>
+                )}
+
+                <PlayButton onClick={e => playSong()}>
+                  <IconPlay />
+                  {winner && (
+                    <ConfettiExplosion
+                      duration={5000}
+                      particleCount={200}
+                      onComplete={e => console.log('DONE!')}
+                    />
+                  )}
+                </PlayButton>
+
+                {(winner || loser) && (
+                  <SecondaryButton to={`/play/${artist.id}`} onClick={startGame}>
+                    <IconReset />
+                  </SecondaryButton>
+                )}
+              </div>
+
+              <GuessContainer>
+                <GuessInput
+                  id="guess0"
+                  key="guess0"
+                  autoComplete="off"
+                  placeholder="Type your guess..."
+                  onChange={e => displayTracks(e.target.value.toLowerCase())}
+                  disabled={guesses.length > 0}
+                />
+                {guesses.length > 0 ? (
+                  <GuessInput
+                    id="guess1"
+                    key="guess1"
+                    autoComplete="off"
+                    placeholder="Type your guess..."
+                    onChange={e => displayTracks(e.target.value.toLowerCase())}
+                    disabled={guesses.length > 1}
+                  />
+                ) : null}
+                {guesses.length > 1 ? (
+                  <GuessInput
+                    id="guess2"
+                    key="guess2"
+                    autoComplete="off"
+                    placeholder="Type your guess..."
+                    onChange={e => displayTracks(e.target.value.toLowerCase())}
+                    disabled={guesses.length > 2}
+                  />
+                ) : null}
+                {guesses.length > 2 ? (
+                  <GuessInput
+                    id="guess3"
+                    key="guess3"
+                    autoComplete="off"
+                    placeholder="Type your guess..."
+                    onChange={e => displayTracks(e.target.value.toLowerCase())}
+                    disabled={guesses.length > 3}
+                  />
+                ) : null}
+                {guesses.length > 3 ? (
+                  <GuessInput
+                    id="guess4"
+                    key="guess4"
+                    autoComplete="off"
+                    placeholder="Type your guess..."
+                    onChange={e => displayTracks(e.target.value.toLowerCase())}
+                    disabled={guesses.length > 4}
+                  />
+                ) : null}
+              </GuessContainer>
+
+              <TracksContainer>
+                {displayedTracks
+                  ? displayedTracks.map((track, i) => (
+                      <TrackItem
+                        track={track}
+                        onClick={e => {
+                          if (!winner && !loser) {
+                            checkGuess(track);
+                          }
+                        }}
+                        key={i}
+                      />
+                    ))
+                  : null}
+              </TracksContainer>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <DevicesContainer>
+                <DevicesHeader>Select a device</DevicesHeader>
+                {devicesAvailable.length > 0 ? (
+                  devicesAvailable.map((device, i) =>
+                    device.id && device.name ? (
+                      <DeviceContainer
+                        key={device.id}
+                        onClick={e => setDeviceId(device.id)}
+                        style={{ backgroundColor: deviceId === device.id ? colors.green : null }}
+                      >
+                        {device.type === 'Computer' ? (
+                          <IconComputer />
+                        ) : device.type === 'Smartphone' ? (
+                          <IconPhone />
+                        ) : device.type === 'CastAudio' ? (
+                          <IconSpeaker />
+                        ) : (
+                          <p>?</p>
+                        )}
+
+                        <DeviceName>{device.name}</DeviceName>
+                      </DeviceContainer>
+                    ) : null,
+                  )
+                ) : (
+                  <div
+                    style={{
+                      color: colors.lightGrey,
+                      paddingLeft: '18px',
+                      margin: '10px 0 20px 0',
+                    }}
+                  >
+                    No devices available!
+                  </div>
+                )}
+                <DeviceHelpContainer
+                  href={'https://support.spotify.com/us/article/spotify-connect/'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <DeviceName style={{ marginLeft: 0 }}>Don't see your device?</DeviceName>
+                  <div style={{ color: colors.lightGrey }}>
+                    <IconExternal />
+                  </div>
+                </DeviceHelpContainer>
+                <DeviceHelpContainer
+                  href={'https://connect.spotify.com/howto'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <DeviceName style={{ marginLeft: 0 }}>What can I connect to?</DeviceName>
+                  <div style={{ color: colors.lightGrey }}>
+                    <IconExternal />
+                  </div>
+                </DeviceHelpContainer>
+              </DevicesContainer>
+              <StartButton onClick={e => startGame()} disabled={!deviceId}>
+                Start Game
+              </StartButton>
+            </div>
+          )}
+        </PageContainer>
+      ) : (
+        <Loader />
+      )}
+    </React.Fragment>
+  );
 };
 
 Play.propTypes = {
-    artistId: PropTypes.string,
+  artistId: PropTypes.string,
 };
 
 export default Play;
