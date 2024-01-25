@@ -14,6 +14,9 @@ const getTokenTimestamp = () => window.localStorage.getItem('spotify_token_times
 const getLocalAccessToken = () => window.localStorage.getItem('spotify_access_token');
 const getLocalRefreshToken = () => window.localStorage.getItem('spotify_refresh_token');
 
+export const setDatabase = data => window.localStorage.setItem('spotify_heardle_database', JSON.stringify(data));
+export const getDatabase = () => JSON.parse(window.localStorage.getItem('spotify_heardle_database'));
+
 // Refresh the token
 const refreshAccessToken = async () => {
   try {
@@ -277,9 +280,14 @@ export const getAllTracksByArtist = async artistId => {
   let results = [];
   const { data } = await getAllAlbumsByArtist(artistId);
   data.items.forEach(async ({ id, name }) => {
+    if (name.toLowerCase().includes('remix')) {
+      return;
+    }
     const { data } = await getAllTracksByAlbum(id);
     data.items.forEach(({ id, name }) => {
-      results.push({ id, name });
+      if (!name.lowerCase.toLowerCase().includes('remix')) {
+        results.push({ id, name });
+      }
     });
   });
 };

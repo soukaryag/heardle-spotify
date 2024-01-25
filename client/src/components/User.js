@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from '@reach/router';
-import { getUserInfo, getSearchArists, getAllTracksByArtist, logout } from '../spotify';
+import { getUserInfo, getSearchArists, logout } from '../spotify';
 import { catchErrors } from '../utils';
 
 import { IconUser, IconInfo } from './icons';
