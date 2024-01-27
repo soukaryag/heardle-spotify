@@ -14,8 +14,10 @@ const getTokenTimestamp = () => window.localStorage.getItem('spotify_token_times
 const getLocalAccessToken = () => window.localStorage.getItem('spotify_access_token');
 const getLocalRefreshToken = () => window.localStorage.getItem('spotify_refresh_token');
 
-export const setDatabase = data => window.localStorage.setItem('spotify_heardle_database', JSON.stringify(data));
-export const getDatabase = () => JSON.parse(window.localStorage.getItem('spotify_heardle_database'));
+export const setDatabase = data =>
+  window.localStorage.setItem('spotify_heardle_database', JSON.stringify(data));
+export const getDatabase = () =>
+  JSON.parse(window.localStorage.getItem('spotify_heardle_database'));
 
 // Refresh the token
 const refreshAccessToken = async () => {
@@ -297,7 +299,7 @@ export const startPlayback = async (trackId, deviceId) => {
   const data = JSON.stringify({
     uris: [`spotify:track:${trackId}`],
     position_ms: 0,
-    device_id: '11b2af95a53bface4fd8e6b97100938976ae0599',
+    device_id: deviceId,
   });
   axios({
     method: 'put',
@@ -318,6 +320,13 @@ export const pausePlayback = async deviceId => {
 
 export const getAllDevices = async () =>
   await axios.get(`https://api.spotify.com/v1/me/player/devices`, { headers });
+
+export const getSpotifyHtml = async () =>
+  await axios.get(`https://open.spotify.com/artist/6hfwwpXqZPRC9CsKI7qtv1`, { headers });
+
+
+
+
 
 export const getUserInfo = () =>
   axios

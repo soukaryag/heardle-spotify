@@ -13,6 +13,13 @@ import IconReset from './reset';
 import IconComputer from './computer';
 import IconSpeaker from './speaker';
 import IconPhone from './phone';
+import IconVerified from './verified';
+import IconBack from './back';
+import IconForward from './forward';
+import IconTrophy from './trophy';
+import IconLoss from './loss';
+import IconBrain from './brain';
+
 
 export {
   IconUser,
@@ -30,4 +37,10 @@ export {
   IconComputer,
   IconSpeaker,
   IconPhone,
+  IconVerified,
+  IconBack,
+  IconForward,
+  IconTrophy,
+  IconLoss,
+  IconBrain,
 };

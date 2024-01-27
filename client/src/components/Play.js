@@ -31,79 +31,80 @@ import { Link } from '@reach/router';
 const { colors, fontSizes, fonts, spacing } = theme;
 
 const PageContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
 `;
 const Header = styled.div`
-    display: grid;
-    grid-template-columns: 4fr 1fr 4fr
+  display: grid;
+  grid-template-columns:
+    4fr 1fr 4fr
     ${media.tablet`
         display: flex;
         flex-direction: column;
         margin-bottom: 6vh;
     `};
-    ${media.phablet`
+  ${media.phablet`
         display: flex;
         flex-direction: column;
         margin-bottom: 6vh;
     `};
 `;
 const HeaderContainer = styled(Main)`
-    ${mixins.flexTop};
-    flex-direction: row;
-    min-height: 10%;
-    ${media.tablet`
+  ${mixins.flexTop};
+  flex-direction: row;
+  min-height: 10%;
+  ${media.tablet`
         padding: 30px 20px 0px 20px;
         justify-content: center;
     `};
-    ${media.phablet`
+  ${media.phablet`
         padding: 30px 20px 0px 20px;
         justify-content: center;
     `};
 `;
 const Artwork = styled.div`
+  border-radius: 100%;
+  img {
+    object-fit: cover;
     border-radius: 100%;
-    img {
-        object-fit: cover;
-        border-radius: 100%;
-        width: 120px;
-        height: 120px;
-        ${media.tablet`
+    width: 120px;
+    height: 120px;
+    ${media.tablet`
             width: 60px;
             height: 60px;
         `};
-    }
+  }
 `;
 const ArtistName = styled.a`
-    display: inline;
-    border-bottom: 1px solid transparent;
-    font-weight: 500;
-    &:hover {
-        color: ${colors.green};
-    }
-    font-size: 50px;
-    ${media.tablet`
+  display: inline;
+  border-bottom: 1px solid transparent;
+  font-weight: 500;
+  &:hover {
+    color: ${colors.green};
+  }
+  font-size: 50px;
+  ${media.tablet`
         font-size: 7vw;
     `};
 `;
 const Stats = styled.div`
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-gap: 8px;
-    margin-top: ${spacing.sm};
-    text-align: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-gap: 8px;
+  margin-top: ${spacing.sm};
+  text-align: center;
 `;
 const Stat = styled.div`
-    margin: auto auto;
+  margin: auto auto;
 `;
 const Number = styled.div`
-    color: ${colors.blue};
-    font-weight: 500;
-    font-size: ${fontSizes.sm};
-    text-transform: capitalize;
-    ${media.tablet`
+  color: ${colors.blue};
+  font-weight: 500;
+  font-size: ${fontSizes.sm};
+  text-transform: capitalize;
+  ${media.tablet`
         font-size: ${fontSizes.sm};
     `};
 `;
@@ -262,11 +263,11 @@ const DeviceName = styled.div`
   margin: auto 10px;
 `;
 const DevicesHeader = styled.a`
-    display: inline;
-    font-weight: 700;
-    font-size: 18px;
-    padding: 10px;
-    ${media.tablet`
+  display: inline;
+  font-weight: 700;
+  font-size: 18px;
+  padding: 10px;
+  ${media.tablet`
         font-size: 5vw;
     `};
 `;
@@ -280,7 +281,7 @@ const Play = props => {
   const [currentTrack, setCurrentTrack] = useState(null);
   const [deviceId, setDeviceId] = useState(null);
   const [devicesAvailable, setDevicesAvailable] = useState([]);
-  const [statsForArtist, setStatsForArtist] = useState({})
+  const [statsForArtist, setStatsForArtist] = useState({});
 
   const timeLimitsArray = [1500, 2000, 4000, 8000, 16000, 32000];
   const [guesses, setGuesses] = useState([]);
@@ -291,31 +292,29 @@ const Play = props => {
 
   useEffect(() => {
     if (guesses.length >= 5 && !winner) {
-        console.log('You lost!');
-        setDisplayedTracks([currentTrack]);
-        setLoser(true);
+      console.log('You lost!');
+      setDisplayedTracks([currentTrack]);
+      setLoser(true);
 
-        let db = getDatabase();
-        db[artistId].losses = db[artistId].losses + 1;
-        db[artistId].total_guesses = db[artistId].total_guesses + guesses.length;
-        setDatabase(db)
+      let db = getDatabase();
+      db[artistId].losses = db[artistId].losses + 1;
+      db[artistId].total_guesses = db[artistId].total_guesses + guesses.length;
+      setDatabase(db);
     }
-  }, [guesses])
+  }, [guesses]);
 
   useEffect(() => {
     const fetchData = async () => {
       const { data } = await getAllAlbumsByArtist(artistId);
       data.items.forEach(async ({ id, images, name }) => {
         if (name.toLowerCase().includes('remix')) {
-            return;
+          return;
         }
         const { data } = await getAllTracksByAlbum(id);
         let additionalTracks = data.items ?? [];
-        additionalTracks = additionalTracks.filter(
-            function (el) {
-                return !el.name.toLowerCase().includes('remix')
-            }
-        );
+        additionalTracks = additionalTracks.filter(function (el) {
+          return !el.name.toLowerCase().includes('remix');
+        });
         additionalTracks = additionalTracks.map(obj => ({ ...obj, album: { id, images, name } }));
         setTracks(oldTracks => [...oldTracks, ...additionalTracks]);
       });
@@ -345,21 +344,20 @@ const Play = props => {
   useEffect(() => {
     let db = getDatabase();
     if (!db || db === 'undefined' || !db.hasOwnProperty(artistId)) {
-        db = {}
-        db[artistId] = {
-            attempts: 0,
-            wins: 0,
-            losses: 0,
-            total_guesses: 0,
-            id: artistId
-        }
-        console.log('!!!', db)
-        setStatsForArtist(db[artistId])
-        setDatabase(db)
+      db = {};
+      db[artistId] = {
+        attempts: 0,
+        wins: 0,
+        losses: 0,
+        total_guesses: 0,
+        id: artistId,
+      };
+      console.log('!!!', db);
+      setStatsForArtist(db[artistId]);
+      setDatabase(db);
     } else {
-        setStatsForArtist(db[artistId])
+      setStatsForArtist(db[artistId]);
     }
-    
   }, []);
 
   const startGame = () => {
@@ -420,53 +418,52 @@ const Play = props => {
     // console.log(track.name, currentTrack.name);
 
     if (currId === 0) {
-        let db = getDatabase();
-        if (!db || db === 'undefined') {
-            db = {}
-        }
+      let db = getDatabase();
+      if (!db || db === 'undefined') {
+        db = {};
+      }
 
-        if (db.hasOwnProperty(artistId)) {
-            db[artistId].attempts = db[artistId].attempts + 1;
-        } else {
-            db[artistId] = {
-                attempts: 1,
-                wins: 0,
-                losses: 0,
-                total_guesses: 0,
-                id: artistId
-            }
-        }
-        setDatabase(db);
+      if (db.hasOwnProperty(artistId)) {
+        db[artistId].attempts = db[artistId].attempts + 1;
+      } else {
+        db[artistId] = {
+          attempts: 1,
+          wins: 0,
+          losses: 0,
+          total_guesses: 0,
+          id: artistId,
+        };
+      }
+      setDatabase(db);
     }
 
     setDisplayedTracks([]);
 
     if (
-        track.name === currentTrack.name ||
-        currentTrack.name.toLowerCase().indexOf(track.name) !== -1 ||
-        track.name.toLowerCase().indexOf(currentTrack.name) !== -1
+      track.name === currentTrack.name ||
+      currentTrack.name.toLowerCase().indexOf(track.name) !== -1 ||
+      track.name.toLowerCase().indexOf(currentTrack.name) !== -1
     ) {
-        // got it! WINNER
-        inputElement.setAttribute('style', 'background-color: #1DB954; border: 2px solid #1DB954');
-        startPlayback(currentTrack.id, deviceId);
-        setDisplayedTracks([currentTrack]);
-        setWinner(true);
+      // got it! WINNER
+      inputElement.setAttribute('style', 'background-color: #1DB954; border: 2px solid #1DB954');
+      startPlayback(currentTrack.id, deviceId);
+      setDisplayedTracks([currentTrack]);
+      setWinner(true);
 
-        let db = getDatabase();
-        db[artistId].wins = db[artistId].wins + 1;
-        db[artistId].total_guesses = db[artistId].total_guesses + currId + 1;
-        setDatabase(db);
-
+      let db = getDatabase();
+      db[artistId].wins = db[artistId].wins + 1;
+      db[artistId].total_guesses = db[artistId].total_guesses + currId + 1;
+      setDatabase(db);
     } else if (track.album?.name === currentTrack.album.name) {
-        // same album
-        inputElement.setAttribute('style', 'background-color: #f6cd61; border: 2px solid #f6cd61');
-        playSong(timeLimitsArray[currId + 1]);
-        setGuesses(currGuesses => [...currGuesses, track.name]);
+      // same album
+      inputElement.setAttribute('style', 'background-color: #f6cd61; border: 2px solid #f6cd61');
+      playSong(timeLimitsArray[currId + 1]);
+      setGuesses(currGuesses => [...currGuesses, track.name]);
     } else {
-        // wrong
-        inputElement.setAttribute('style', 'background-color: #69202f; border: 2px solid #69202f');
-        playSong(timeLimitsArray[currId + 1]);
-        setGuesses(currGuesses => [...currGuesses, track.name]);
+      // wrong
+      inputElement.setAttribute('style', 'background-color: #69202f; border: 2px solid #69202f');
+      playSong(timeLimitsArray[currId + 1]);
+      setGuesses(currGuesses => [...currGuesses, track.name]);
     }
   };
 
@@ -474,71 +471,91 @@ const Play = props => {
     <React.Fragment>
       {tracks.length > 0 && artist ? (
         <PageContainer>
-            <Header>
-                <HeaderContainer>
-                    <Artwork>
-                        <img src={artist.images[0].url} alt="Artist Artwork" />
-                    </Artwork>
-                    <div style={{ marginLeft: spacing.md }}>
-                        <ArtistName
-                            href={artist.external_urls.spotify}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            {artist.name}
-                        </ArtistName>
-                        <Stats>
-                            <Stat>
-                                <Number>{formatWithCommas(artist.followers.total)}</Number>
-                                <NumLabel>Followers</NumLabel>
-                            </Stat>
-                            {artist.genres.length > 0 && (
-                                <Stat>
-                                    <Number>
-                                    <Genre key={artist.genres[0]}>{artist.genres[0]}</Genre>
-                                    </Number>
-                                    <NumLabel>Genres</NumLabel>
-                                </Stat>
-                            )}
-                            {artist.popularity && (
-                                <Stat>
-                                    <Number>{artist.popularity}%</Number>
-                                    <NumLabel>Popularity</NumLabel>
-                                </Stat>
-                            )}
-                        </Stats>
-                    </div>
-                </HeaderContainer>
-                
-                <div />
+          <Header>
+            <HeaderContainer>
+              <Artwork>
+                <img src={artist.images[1].url} alt="Artist Artwork" />
+              </Artwork>
+              <div style={{ marginLeft: spacing.md }}>
+                <ArtistName
+                  href={artist.external_urls.spotify}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {artist.name}
+                </ArtistName>
+                <Stats>
+                  <Stat>
+                    <Number>{formatWithCommas(artist.followers.total)}</Number>
+                    <NumLabel>Followers</NumLabel>
+                  </Stat>
+                  {artist.genres.length > 0 && (
+                    <Stat>
+                      <Number>
+                        <Genre key={artist.genres[0]}>{artist.genres[0]}</Genre>
+                      </Number>
+                      <NumLabel>Genres</NumLabel>
+                    </Stat>
+                  )}
+                  {artist.popularity && (
+                    <Stat>
+                      <Number>{artist.popularity}%</Number>
+                      <NumLabel>Popularity</NumLabel>
+                    </Stat>
+                  )}
+                </Stats>
+              </div>
+            </HeaderContainer>
 
-                { statsForArtist ? (
-                    <HeaderContainer>
-                        <Stats style={{ backgroundColor: colors.darkGrey, borderRadius: '6px', padding: '20px 30px' }}>
-                            {statsForArtist.attempts > -1 ? (
-                                <Stat>
-                                    <Number>{statsForArtist.attempts}</Number>
-                                    <NumLabel>Attempts</NumLabel>
-                                </Stat>
-                            ) : <div />}
-                            {statsForArtist.wins > -1 ? (
-                                <Stat>
-                                    <Number>{statsForArtist.wins}</Number>
-                                    <NumLabel>Wins</NumLabel>
-                                </Stat>
-                            ) : <div />}
-                            {statsForArtist.total_guesses > -1 ? (
-                                <Stat style={{paddingTop: '16px'}}>
-                                    <Number>{statsForArtist.attempts > 0 ? statsForArtist.total_guesses / statsForArtist.attempts : 0}</Number>
-                                    <NumLabel>Avg<br/>Guesses</NumLabel>
-                                </Stat>
-                            ) : <div />}
-                        </Stats>
-                    </HeaderContainer>
-                ) : <div />}
-                
-            </Header>
-          
+            <div />
+
+            {statsForArtist ? (
+              <HeaderContainer>
+                <Stats
+                  style={{
+                    backgroundColor: colors.darkGrey,
+                    borderRadius: '6px',
+                    padding: '20px 30px',
+                  }}
+                >
+                  {statsForArtist.attempts > -1 ? (
+                    <Stat>
+                      <Number>{statsForArtist.attempts}</Number>
+                      <NumLabel>Attempts</NumLabel>
+                    </Stat>
+                  ) : (
+                    <div />
+                  )}
+                  {statsForArtist.wins > -1 ? (
+                    <Stat>
+                      <Number>{statsForArtist.wins}</Number>
+                      <NumLabel>Wins</NumLabel>
+                    </Stat>
+                  ) : (
+                    <div />
+                  )}
+                  {statsForArtist.total_guesses > -1 ? (
+                    <Stat style={{ paddingTop: '16px' }}>
+                      <Number>
+                        {statsForArtist.attempts > 0
+                          ? statsForArtist.total_guesses / statsForArtist.attempts
+                          : 0}
+                      </Number>
+                      <NumLabel>
+                        Avg
+                        <br />
+                        Guesses
+                      </NumLabel>
+                    </Stat>
+                  ) : (
+                    <div />
+                  )}
+                </Stats>
+              </HeaderContainer>
+            ) : (
+              <div />
+            )}
+          </Header>
 
           {playing && currentTrack && deviceId ? (
             <div
@@ -575,7 +592,7 @@ const Play = props => {
                 </PlayButton>
 
                 {(winner || loser) && (
-                  <SecondaryButton to={`/play/${artistId}`} onClick={startGame}>
+                  <SecondaryButton to={`/play/artist/${artistId}`} onClick={startGame}>
                     <IconReset />
                   </SecondaryButton>
                 )}
@@ -650,65 +667,65 @@ const Play = props => {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <DevicesContainer>
-                    <DevicesHeader>Select a device</DevicesHeader>
-                    {devicesAvailable.length > 0 ? (
-                    devicesAvailable.map((device, i) =>
-                        device.id && device.name ? (
-                        <DeviceContainer
-                            key={device.id}
-                            onClick={e => setDeviceId(device.id)}
-                            style={{ backgroundColor: deviceId === device.id ? colors.green : null }}
-                        >
-                            {device.type === 'Computer' ? (
-                            <IconComputer />
-                            ) : device.type === 'Smartphone' ? (
-                            <IconPhone />
-                            ) : device.type === 'CastAudio' ? (
-                            <IconSpeaker />
-                            ) : (
-                            <p>?</p>
-                            )}
+              <DevicesContainer>
+                <DevicesHeader>Select a device</DevicesHeader>
+                {devicesAvailable.length > 0 ? (
+                  devicesAvailable.map((device, i) =>
+                    device.id && device.name ? (
+                      <DeviceContainer
+                        key={device.id}
+                        onClick={e => setDeviceId(device.id)}
+                        style={{ backgroundColor: deviceId === device.id ? colors.green : null }}
+                      >
+                        {device.type === 'Computer' ? (
+                          <IconComputer />
+                        ) : device.type === 'Smartphone' ? (
+                          <IconPhone />
+                        ) : device.type === 'CastAudio' ? (
+                          <IconSpeaker />
+                        ) : (
+                          <p>?</p>
+                        )}
 
-                            <DeviceName>{device.name}</DeviceName>
-                        </DeviceContainer>
-                        ) : null,
-                    )
-                    ) : (
-                    <div
-                        style={{
-                        color: colors.lightGrey,
-                        paddingLeft: '18px',
-                        margin: '10px 0 20px 0',
-                        }}
-                    >
-                        No devices available!
-                    </div>
-                    )}
-                    <DeviceHelpContainer
-                    href={'https://support.spotify.com/us/article/spotify-connect/'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    >
-                    <DeviceName style={{ marginLeft: 0 }}>Don't see your device?</DeviceName>
-                    <div style={{ color: colors.lightGrey }}>
-                        <IconExternal />
-                    </div>
-                    </DeviceHelpContainer>
-                    <DeviceHelpContainer
-                    href={'https://connect.spotify.com/howto'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    >
-                    <DeviceName style={{ marginLeft: 0 }}>What can I connect to?</DeviceName>
-                    <div style={{ color: colors.lightGrey }}>
-                        <IconExternal />
-                    </div>
-                    </DeviceHelpContainer>
-                </DevicesContainer>
-                <StartButton onClick={e => startGame()} disabled={!deviceId}>
-                    Start Game
-                </StartButton>
+                        <DeviceName>{device.name}</DeviceName>
+                      </DeviceContainer>
+                    ) : null,
+                  )
+                ) : (
+                  <div
+                    style={{
+                      color: colors.lightGrey,
+                      paddingLeft: '18px',
+                      margin: '10px 0 20px 0',
+                    }}
+                  >
+                    No devices available!
+                  </div>
+                )}
+                <DeviceHelpContainer
+                  href={'https://support.spotify.com/us/article/spotify-connect/'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <DeviceName style={{ marginLeft: 0 }}>Don't see your device?</DeviceName>
+                  <div style={{ color: colors.lightGrey }}>
+                    <IconExternal />
+                  </div>
+                </DeviceHelpContainer>
+                <DeviceHelpContainer
+                  href={'https://connect.spotify.com/howto'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <DeviceName style={{ marginLeft: 0 }}>What can I connect to?</DeviceName>
+                  <div style={{ color: colors.lightGrey }}>
+                    <IconExternal />
+                  </div>
+                </DeviceHelpContainer>
+              </DevicesContainer>
+              <StartButton onClick={e => startGame()} disabled={!deviceId}>
+                Start Game
+              </StartButton>
             </div>
           )}
         </PageContainer>

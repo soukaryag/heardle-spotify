@@ -4,15 +4,11 @@ import { Router } from '@reach/router';
 import ScrollToTop from './ScrollToTop';
 import Nav from './Nav';
 import User from './User';
-import RecentlyPlayed from './RecentlyPlayed';
 import TopArtists from './TopArtists';
 import TopTracks from './TopTracks';
-import Playlists from './Playlists';
-import Playlist from './Playlist';
-import Recommendations from './Recommendations';
 import Play from './Play';
+import PlayV2 from './PlayV2';
 import Track from './Track';
-import Artist from './Artist';
 
 import styled from 'styled-components/macro';
 import { theme, media } from '../styles';
@@ -31,15 +27,11 @@ const Profile = () => (
     <Router primary={false}>
       <ScrollToTop path="/">
         <User path="/" />
-        {/* <RecentlyPlayed path="recent" /> */}
         <TopArtists path="artists" />
         <TopTracks path="tracks" />
-        {/* <Playlists path="playlists" /> */}
-        {/* <Playlist path="playlists/:playlistId" /> */}
-        {/* <Recommendations path="recommendations/:playlistId" /> */}
-        <Play path="play/:artistId" />
+        <Play path="play/artist/:artistId" />
+        <PlayV2 path="play/v2/artist/:artistId" />
         <Track path="track/:trackId" />
-        {/* <Artist path="artist/:artistId" /> */}
       </ScrollToTop>
     </Router>
   </SiteWrapper>
