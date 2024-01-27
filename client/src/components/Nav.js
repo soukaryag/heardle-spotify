@@ -1,11 +1,7 @@
 import React from 'react';
 import { Link } from '@reach/router';
 
-import {
-  IconSpotify,
-  IconGithub,
-  IconHome,
-} from './icons';
+import { IconSpotify, IconGithub, IconHome } from './icons';
 
 import styled from 'styled-components/macro';
 import { theme, mixins, media } from '../styles';

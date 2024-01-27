@@ -21,7 +21,6 @@ import IconLoss from './loss';
 import IconBrain from './brain';
 import IconHome from './home';
 
-
 export {
   IconUser,
   IconGithub,

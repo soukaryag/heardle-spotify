@@ -75,7 +75,11 @@ export const parsePitchClass = note => {
   return key;
 };
 
-export const formatWithCommas = n => n.toFixed(1).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+export const formatWithCommas = n =>
+  n
+    .toFixed(1)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
 export const formatLargeNumber = n => {
   if (n < 1e3) return n;

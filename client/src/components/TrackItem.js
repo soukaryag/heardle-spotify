@@ -79,9 +79,9 @@ const TrackDuration = styled.span`
   font-size: ${fontSizes.sm};
 `;
 
-const TrackItem = ({ track, onClick }) => (
+const TrackItem = ({ track, onClick, selected }) => (
   <li>
-    <TrackContainer onClick={onClick ?? null}>
+    <TrackContainer onClick={onClick ?? null} style={{ border: selected ? '1px solid white' : '1px solid #00000000' }}>
       {track.album ? (
         <div>
           <TrackArtwork>

@@ -48,198 +48,220 @@ import {
 const { colors, fontSizes, fonts, spacing } = theme;
 
 const PlayV2 = props => {
-  const { artistId } = props;
+    const { artistId } = props;
 
-  // const [searchParams, setSearchParams] = useSearchParams();
+    const [artist, setArtist] = useState(null);
+    const [tracks, setTracks] = useState([]);
+    const [currentTrack, setCurrentTrack] = useState(null);
+    const [deviceId, setDeviceId] = useState(props.location.search.split('=')[1] ?? null);
+    const [gradientColor, setGradientColor] = useState(colors.green);
 
-  const [artist, setArtist] = useState(null);
-  const [tracks, setTracks] = useState([]);
-  const [currentTrack, setCurrentTrack] = useState(null);
-  const [deviceId, setDeviceId] = useState(props.location.search.split('=')[1] ?? null);
-  const [gradientColor, setGradientColor] = useState(colors.green);
+    const timeLimitsArray = [1500, 2000, 4000, 8000, 16000, 32000];
+    const [guesses, setGuesses] = useState([]);
+    const [displayedTracks, setDisplayedTracks] = useState(null);
+    const [trackPlaying, setTrackPlaying] = useState(false);
+    const [winner, setWinner] = useState(false);
+    const [loser, setLoser] = useState(false);
 
-  const timeLimitsArray = [1500, 2000, 4000, 8000, 16000, 32000];
-  const [guesses, setGuesses] = useState([]);
-  const [displayedTracks, setDisplayedTracks] = useState(null);
-  const [trackPlaying, setTrackPlaying] = useState(false);
-  const [winner, setWinner] = useState(false);
-  const [loser, setLoser] = useState(false);
+    const [albumGuessed, setAlbumGuessed] = useState(false);
+    const [trackSelectedFromSearch, setTrackSelectedFromSearch] = useState(0);
 
-  const [albumGuessed, setAlbumGuessed] = useState(false);
+    const [user, setUser] = useState(null);
 
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const { user } = await getUserInfo();
-      setUser(user);
-    };
-    catchErrors(fetchData());
-  }, []);
-
-  useEffect(() => {
-    if (guesses.length >= 5 && !winner) {
-      console.log('You lost!');
-      setDisplayedTracks([currentTrack]);
-      setLoser(true);
-
-      let db = getDatabase();
-      db[artistId].losses = db[artistId].losses + 1;
-      db[artistId].total_guesses = db[artistId].total_guesses + guesses.length;
-      setDatabase(db);
-    }
-  }, [guesses]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data } = await getAllAlbumsByArtist(artistId);
-      data.items.forEach(async ({ id, images, name }) => {
-        if (name.toLowerCase().includes('remix') || name.toLowerCase().includes('live')) {
-          return;
-        }
-        const { data } = await getAllTracksByAlbum(id);
-        let additionalTracks = data.items ?? [];
-        additionalTracks = additionalTracks.filter(function (el) {
-          return (
-            !el.name.toLowerCase().includes('remix') && !el.name.toLowerCase().includes('live')
-          );
-        });
-        additionalTracks = additionalTracks.map(obj => ({
-          ...obj,
-          album: {
-            id,
-            images,
-            name,
-          },
-        }));
-        setTracks(oldTracks => [...oldTracks, ...additionalTracks]);
-      });
-    };
-    catchErrors(fetchData());
-  }, [artistId]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data } = await getArtist(artistId);
-      setArtist(data);
-      document.title = `${data?.name} | Heardle`;
-    };
-    catchErrors(fetchData());
-  }, [artistId]);
-
-  useEffect(() => {
-    const random = Math.floor(Math.random() * tracks.length);
-    setCurrentTrack(tracks[random]);
-  }, [tracks]);
-
-  useEffect(() => {
-    setWinner(false);
-    setLoser(false);
-    pausePlayback(deviceId);
-    setTrackPlaying(false);
-    setDisplayedTracks(false);
-    setGuesses([]);
-    for (let i = 0; i < 5; i++) {
-      let inputElement = document.getElementById(`guess${i}`);
-      if (inputElement) {
-        inputElement.setAttribute(
-          `style", "background-color: ${colors.darkGrey}; border: 2px solid ${colors.darkGrey}`,
-        );
-      }
-    }
-  }, []);
-
-  const displayTracks = text => {
-    if (!text) {
-      setDisplayedTracks([]);
-      return;
-    }
-
-    const matchedTracks = tracks.filter(
-      function (el) {
-        if (this.count < 5 && el.name.toLowerCase().includes(text)) {
-          this.count++;
-          return true;
-        }
-        return false;
-      },
-      {
-        count: 0,
-      },
-    );
-
-    setDisplayedTracks(matchedTracks);
-  };
-
-  const playSong = timeLimit => {
-    setTrackPlaying(true);
-    startPlayback(currentTrack.id, deviceId);
-    setTimeout(function () {
-      pausePlayback(deviceId);
-      setTrackPlaying(false);
-    }, timeLimit ?? timeLimitsArray[guesses.length]);
-  };
-
-  const checkGuess = track => {
-    const currId = guesses.length;
-    const inputElement = document.getElementById(`guess${currId}`);
-    inputElement.value = track.name;
-
-    // For debugging console.log(track.name, currentTrack.name);
-
-    if (currId === 0) {
-      let db = getDatabase();
-      if (!db || db === 'undefined') {
-        db = {};
-      }
-
-      if (db.hasOwnProperty(artistId)) {
-        db[artistId].attempts = db[artistId].attempts + 1;
-      } else {
-        db[artistId] = {
-          attempts: 1,
-          wins: 0,
-          losses: 0,
-          total_guesses: 0,
-          id: artistId,
+    useEffect(() => {
+        const fetchData = async () => {
+        const { user } = await getUserInfo();
+        setUser(user);
         };
-      }
-      setDatabase(db);
+        catchErrors(fetchData());
+    }, []);
+
+    useEffect(() => {
+        if (guesses.length >= 5 && !winner) {
+            console.log('You lost!');
+            setDisplayedTracks([currentTrack]);
+            setLoser(true);
+
+            let db = getDatabase();
+            db[artistId].losses = db[artistId].losses + 1;
+            db[artistId].total_guesses = db[artistId].total_guesses + guesses.length;
+            setDatabase(db);
+        }
+    }, [guesses]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+        const { data } = await getAllAlbumsByArtist(artistId);
+        data.items.forEach(async ({ id, images, name }) => {
+            if (name.toLowerCase().includes('remix') || name.toLowerCase().includes('live')) {
+                return;
+            }
+            const { data } = await getAllTracksByAlbum(id);
+            let additionalTracks = data.items ?? [];
+            additionalTracks = additionalTracks.filter(function (el) {
+                return (
+                    !el.name.toLowerCase().includes('remix') && !el.name.toLowerCase().includes('live')
+                );
+            });
+            additionalTracks = additionalTracks.map(obj => ({
+                ...obj,
+                album: {
+                    id,
+                    images,
+                    name,
+                },
+            }));
+            setTracks(oldTracks => [...oldTracks, ...additionalTracks]);
+        });
+        };
+        catchErrors(fetchData());
+    }, [artistId]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+        const { data } = await getArtist(artistId);
+        setArtist(data);
+        document.title = `${data?.name} | Heardle`;
+        };
+        catchErrors(fetchData());
+    }, [artistId]);
+
+    useEffect(() => {
+        const random = Math.floor(Math.random() * tracks.length);
+        setCurrentTrack(tracks[random]);
+    }, [tracks]);
+
+    useEffect(() => {
+        setWinner(false);
+        setLoser(false);
+        pausePlayback(deviceId);
+        setTrackPlaying(false);
+        setDisplayedTracks(false);
+        setGuesses([]);
+        for (let i = 0; i < 5; i++) {
+        let inputElement = document.getElementById(`guess${i}`);
+        if (inputElement) {
+            inputElement.setAttribute(
+            `style", "background-color: ${colors.darkGrey}; border: 2px solid ${colors.darkGrey}`,
+            );
+        }
+        }
+    }, []);
+
+    const displayTracks = text => {
+        if (!text) {
+            setDisplayedTracks([]);
+            return;
+        }
+
+        const matchedTracks = tracks.filter(
+        function (el) {
+            if (this.count < 5 && el.name.toLowerCase().includes(text)) {
+                this.count++;
+                return true;
+            }
+            return false;
+        },
+        {
+            count: 0,
+        },
+        );
+
+        setDisplayedTracks(matchedTracks);
+    };
+
+    const playSong = timeLimit => {
+        setTrackPlaying(true);
+        startPlayback(currentTrack.id, deviceId);
+        setTimeout(function () {
+            pausePlayback(deviceId);
+            setTrackPlaying(false);
+        }, timeLimit ?? timeLimitsArray[guesses.length]);
+    };
+
+    const checkGuess = track => {
+        const currId = guesses.length;
+        const inputElement = document.getElementById(`guess${currId}`);
+        inputElement.value = track.name;
+
+        // For debugging console.log(track.name, currentTrack.name);
+
+        if (currId === 0) {
+            let db = getDatabase();
+            if (!db || db === 'undefined') {
+                db = {};
+            }
+
+            if (db.hasOwnProperty(artistId)) {
+                db[artistId].attempts = db[artistId].attempts + 1;
+            } else {
+                db[artistId] = {
+                    attempts: 1,
+                    wins: 0,
+                    losses: 0,
+                    total_guesses: 0,
+                    id: artistId,
+                };
+            }
+            setDatabase(db);
+        }
+
+        setDisplayedTracks([]);
+
+        if (track.album.name === currentTrack.album.name) {
+            setAlbumGuessed(true);
+        }
+
+        if (
+            track.name === currentTrack.name ||
+            currentTrack.name.toLowerCase().indexOf(track.name) !== -1 ||
+            track.name.toLowerCase().indexOf(currentTrack.name) !== -1
+        ) {
+            // got it! WINNER
+            inputElement.setAttribute('style', 'background-color: #1DB954; border: 2px solid #1DB954');
+            inputElement.disabled = true;
+            startPlayback(currentTrack.id, deviceId);
+            setDisplayedTracks([currentTrack]);
+            setWinner(true);
+
+            let db = getDatabase();
+            db[artistId].wins = db[artistId].wins + 1;
+            db[artistId].total_guesses = db[artistId].total_guesses + currId + 1;
+            setDatabase(db);
+        } else if (track.album?.name === currentTrack.album.name) {
+            // same album
+            inputElement.setAttribute('style', 'background-color: #f6cd61; border: 2px solid #f6cd61');
+            playSong(timeLimitsArray[currId + 1]);
+            setGuesses(currGuesses => [...currGuesses, track.name]);
+        } else {
+            // wrong
+            inputElement.setAttribute('style', 'background-color: #69202f; border: 2px solid #69202f');
+            playSong(timeLimitsArray[currId + 1]);
+            setGuesses(currGuesses => [...currGuesses, track.name]);
+        }
+    };
+
+    const handleKeyPress = e => {
+        if (e.key === 'Enter') {
+            checkGuess(displayedTracks[trackSelectedFromSearch]);
+        } else if (e.key === 'ArrowUp') {
+            setTrackSelectedFromSearch(e => {
+                if (e > 0) {
+                    return e - 1;
+                } else {
+                    return e
+                }
+            });
+        } else if (e.key === 'ArrowDown') {
+            setTrackSelectedFromSearch(e => {
+                if (e < 4) {
+                    return e + 1;
+                } else {
+                    return e
+                }
+            });
+        }
     }
-
-    setDisplayedTracks([]);
-
-    if (track.album.name === currentTrack.album.name) {
-      setAlbumGuessed(true);
-    }
-
-    if (
-      track.name === currentTrack.name ||
-      currentTrack.name.toLowerCase().indexOf(track.name) !== -1 ||
-      track.name.toLowerCase().indexOf(currentTrack.name) !== -1
-    ) {
-      // got it! WINNER
-      inputElement.setAttribute('style', 'background-color: #1DB954; border: 2px solid #1DB954');
-      startPlayback(currentTrack.id, deviceId);
-      setDisplayedTracks([currentTrack]);
-      setWinner(true);
-
-      let db = getDatabase();
-      db[artistId].wins = db[artistId].wins + 1;
-      db[artistId].total_guesses = db[artistId].total_guesses + currId + 1;
-      setDatabase(db);
-    } else if (track.album?.name === currentTrack.album.name) {
-      // same album
-      inputElement.setAttribute('style', 'background-color: #f6cd61; border: 2px solid #f6cd61');
-      playSong(timeLimitsArray[currId + 1]);
-      setGuesses(currGuesses => [...currGuesses, track.name]);
-    } else {
-      // wrong
-      inputElement.setAttribute('style', 'background-color: #69202f; border: 2px solid #69202f');
-      playSong(timeLimitsArray[currId + 1]);
-      setGuesses(currGuesses => [...currGuesses, track.name]);
-    }
-  };
 
   return (
     <React.Fragment>
@@ -252,7 +274,7 @@ const PlayV2 = props => {
           {currentTrack && deviceId ? (
             <>
               <BannerHeader>
-                <ColorExtractor getColors={colors => setGradientColor(colors[2])}>
+                <ColorExtractor getColors={colors => setGradientColor(colors[1])}>
                   <img
                     src={currentTrack.album.images[0].url}
                     style={{
@@ -359,6 +381,7 @@ const PlayV2 = props => {
                         autoComplete="off"
                         placeholder="Type your guess..."
                         onChange={e => displayTracks(e.target.value.toLowerCase())}
+                        onKeyUp={handleKeyPress}
                         disabled={guesses.length > 0}
                       />
                       {guesses.length > 0 ? (
@@ -412,6 +435,7 @@ const PlayV2 = props => {
                                   checkGuess(track);
                                 }
                               }}
+                              selected={trackSelectedFromSearch === i}
                               key={i}
                             />
                           ))

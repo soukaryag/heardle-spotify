@@ -474,9 +474,9 @@ const Artist = props => {
                             <span
                               style={{ color: colors.green, marginRight: '3px', fontWeight: '600' }}
                             >
-                              Top 0.005%
+                              {(100 * (statsForArtist.wins / statsForArtist.attempts)).toFixed(2)}%
                             </span>{' '}
-                            of all {artist.name} fans
+                            of games won
                           </>
                         }
                       />
@@ -489,9 +489,9 @@ const Artist = props => {
                             <span
                               style={{ color: colors.red, marginRight: '3px', fontWeight: '600' }}
                             >
-                              Bottom 3%
+                              {(100 * (statsForArtist.losses / statsForArtist.attempts)).toFixed(2)}%
                             </span>{' '}
-                            of all {artist.name} fans
+                            of games lost
                           </>
                         }
                       />
@@ -506,9 +506,9 @@ const Artist = props => {
                             <span
                               style={{ color: colors.green, marginRight: '3px', fontWeight: '600' }}
                             >
-                              Top 1%
+                              {(100 * ((statsForArtist.wins + statsForArtist.losses ) / statsForArtist.attempts)).toFixed(2)}%
                             </span>{' '}
-                            of all {artist.name} fans
+                            of games finsihed
                           </>
                         }
                       />
