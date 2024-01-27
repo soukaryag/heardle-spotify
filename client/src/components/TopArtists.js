@@ -169,7 +169,7 @@ const TopArtists = () => {
         {topArtists ? (
           topArtists.items.map(({ id, external_urls, images, name }, i) => (
             <Artist key={i}>
-              <ArtistArtwork to={`/play/v2/artist/${id}`}>
+              <ArtistArtwork to={`/artist/${id}`}>
                 {images.length && <img src={images[1].url} alt="Artist" />}
                 <Mask>
                   <IconInfo />

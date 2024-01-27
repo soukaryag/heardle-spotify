@@ -313,7 +313,9 @@ const Play = props => {
         const { data } = await getAllTracksByAlbum(id);
         let additionalTracks = data.items ?? [];
         additionalTracks = additionalTracks.filter(function (el) {
-          return !el.name.toLowerCase().includes('remix') && !el.name.toLowerCase().includes('live');
+          return (
+            !el.name.toLowerCase().includes('remix') && !el.name.toLowerCase().includes('live')
+          );
         });
         additionalTracks = additionalTracks.map(obj => ({ ...obj, album: { id, images, name } }));
         setTracks(oldTracks => [...oldTracks, ...additionalTracks]);

@@ -8,6 +8,7 @@ import TopArtists from './TopArtists';
 import TopTracks from './TopTracks';
 import Play from './Play';
 import PlayV2 from './PlayV2';
+import Artist from './Artist';
 import Track from './Track';
 
 import styled from 'styled-components/macro';
@@ -29,8 +30,9 @@ const Profile = () => (
         <User path="/" />
         <TopArtists path="artists" />
         <TopTracks path="tracks" />
-        <Play path="play/artist/:artistId" />
-        <PlayV2 path="play/v2/artist/:artistId" />
+        {/* <Play path="play/artist/:artistId" /> */}
+        <Artist path="artist/:artistId" />
+        <PlayV2 path="play/artist/:artistId" />
         <Track path="track/:trackId" />
       </ScrollToTop>
     </Router>

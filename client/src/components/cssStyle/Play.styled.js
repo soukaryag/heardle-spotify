@@ -93,6 +93,17 @@ export const Artwork = styled.div`
         `};
   }
 `;
+export const AlbumArtwork = styled.div`
+  img {
+    object-fit: cover;
+    width: 220px;
+    height: 220px;
+    box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
+    ${media.tablet`
+            display: none;
+        `};
+  }
+`;
 export const ArtistInfoContainer = styled.div`
   margin: 0 20px;
   display: flex;
@@ -175,13 +186,13 @@ export const LinkContainer = styled(Link)`
 `;
 
 export const BodyContainer = styled.div`
-    flex: 5;
-    background-image: linear-gradient(rgba(0, 0, 0, 0.6) 0, ${colors.black} 100%);
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    min-height: 60vh;
-    ${media.tablet`
+  flex: 5;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6) 0, ${colors.black} 100%);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 60vh;
+  ${media.tablet`
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -215,7 +226,7 @@ export const ActionsContainer = styled.div`
         justify-content: space-between;
     `};
 `;
-export const StartButton = styled.a`
+export const StartButton = styled(Link)`
   display: inline-block;
   background-color: ${colors.green};
   color: ${colors.white};
@@ -345,82 +356,82 @@ export const Number = styled.div`
 `;
 
 export const PlayButton = styled.a`
-    display: inline-block;
-    background-color: ${colors.green};
-    color: ${colors.black};
-    border-radius: 100%;
-    padding: 10px 10px;
-    margin: 20px 0;
-    width: 70px;
-    height: 70px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    text-align: center;
-    justify-content: center;
-    &:hover,
-    &:focus {
-        background-color: ${colors.offGreen};
-    }
+  display: inline-block;
+  background-color: ${colors.green};
+  color: ${colors.black};
+  border-radius: 100%;
+  padding: 10px 10px;
+  margin: 20px 0;
+  width: 70px;
+  height: 70px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+  justify-content: center;
+  &:hover,
+  &:focus {
+    background-color: ${colors.offGreen};
+  }
 `;
 export const SecondaryButton = styled(Link)`
-    background-color: ${colors.darkGrey};
-    color: ${colors.white};
-    border-radius: 100%;
-    padding: 10px 10px;
-    margin: 0 15px;
-    width: 50px;
-    height: 50px;
-    font-weight: 500;
-    font-size: 8px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    text-align: flex-end;
-    justify-content: flex-end;
-    &:hover,
-    &:focus {
-        color: ${colors.green};
-    }
+  background-color: ${colors.darkGrey};
+  color: ${colors.white};
+  border-radius: 100%;
+  padding: 10px 10px;
+  margin: 0 15px;
+  width: 50px;
+  height: 50px;
+  font-weight: 500;
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: flex-end;
+  justify-content: flex-end;
+  &:hover,
+  &:focus {
+    color: ${colors.green};
+  }
 `;
 
 export const GuessContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
 `;
 export const GuessInput = styled.input`
-    border: 2px solid ${colors.darkGrey};
-    position: relative;
-    z-index: 1;
-    height: 40px;
-    border-radius: 25px;
-    width: 100%;
-    min-width: 300px;
-    padding-left: 20px;
-    padding-right: 20px;
-    margin-bottom: 10px;
-    font-family: ${fonts.primary}!important;
-    font-size: ${fontSizes.smd};
-    background-color: ${colors.darkGrey};
-    color: white;
-    &:focus {
+  border: 2px solid ${colors.darkGrey};
+  position: relative;
+  z-index: 1;
+  height: 40px;
+  border-radius: 25px;
+  width: 100%;
+  min-width: 300px;
+  padding-left: 20px;
+  padding-right: 20px;
+  margin-bottom: 10px;
+  font-family: ${fonts.primary}!important;
+  font-size: ${fontSizes.smd};
+  background-color: ${colors.darkGrey};
+  color: white;
+  &:focus {
     border: 2px solid ${colors.white};
-    }
-    ${media.tablet`
+  }
+  ${media.tablet`
         min-width: 200px;
     `};
-    ${media.phablet`
+  ${media.phablet`
         min-width: 100px;
     `};
 `;
 
 export const TracksContainer = styled.ul`
-    display: flex;
-    flex-direction: column;
-    width: 500px;
-    margin-top: 50px;
-    ${media.tablet`
+  display: flex;
+  flex-direction: column;
+  width: 500px;
+  margin-top: 50px;
+  ${media.tablet`
         width: 300px;
     `}
 `;

@@ -19,7 +19,15 @@ const StatsCard = ({ stat, label, icon, subtext }) => (
     <StatsCardInside>
       <StatInfo>
         <StatLabel>{label}</StatLabel>
-        <StatNumber>{stat === 0 ? 0 : stat < 1 ? stat.toFixed(2) : stat < 10000 ? formatWithCommas(stat) : formatLargeNumber(stat)}</StatNumber>
+        <StatNumber>
+          {stat === 0
+            ? 0
+            : stat < 1
+            ? stat.toFixed(2)
+            : stat < 10000
+            ? formatWithCommas(stat)
+            : formatLargeNumber(stat)}
+        </StatNumber>
       </StatInfo>
       <StatIcon>{icon}</StatIcon>
     </StatsCardInside>
