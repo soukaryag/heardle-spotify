@@ -20,7 +20,6 @@ import IconTrophy from './trophy';
 import IconLoss from './loss';
 import IconBrain from './brain';
 
-
 export {
   IconUser,
   IconGithub,

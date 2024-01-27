@@ -307,13 +307,13 @@ const Play = props => {
     const fetchData = async () => {
       const { data } = await getAllAlbumsByArtist(artistId);
       data.items.forEach(async ({ id, images, name }) => {
-        if (name.toLowerCase().includes('remix')) {
+        if (name.toLowerCase().includes('remix') || name.toLowerCase().includes('live')) {
           return;
         }
         const { data } = await getAllTracksByAlbum(id);
         let additionalTracks = data.items ?? [];
         additionalTracks = additionalTracks.filter(function (el) {
-          return !el.name.toLowerCase().includes('remix');
+          return !el.name.toLowerCase().includes('remix') && !el.name.toLowerCase().includes('live');
         });
         additionalTracks = additionalTracks.map(obj => ({ ...obj, album: { id, images, name } }));
         setTracks(oldTracks => [...oldTracks, ...additionalTracks]);

@@ -278,22 +278,6 @@ export const getAllAlbumsByArtist = artistId =>
 export const getAllTracksByAlbum = albumId =>
   axios.get(`https://api.spotify.com/v1/albums/${albumId}/tracks`, { headers });
 
-export const getAllTracksByArtist = async artistId => {
-  let results = [];
-  const { data } = await getAllAlbumsByArtist(artistId);
-  data.items.forEach(async ({ id, name }) => {
-    if (name.toLowerCase().includes('remix')) {
-      return;
-    }
-    const { data } = await getAllTracksByAlbum(id);
-    data.items.forEach(({ id, name }) => {
-      if (!name.lowerCase.toLowerCase().includes('remix')) {
-        results.push({ id, name });
-      }
-    });
-  });
-};
-
 export const startPlayback = async (trackId, deviceId) => {
   const url = `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`;
   const data = JSON.stringify({
@@ -323,10 +307,6 @@ export const getAllDevices = async () =>
 
 export const getSpotifyHtml = async () =>
   await axios.get(`https://open.spotify.com/artist/6hfwwpXqZPRC9CsKI7qtv1`, { headers });
-
-
-
-
 
 export const getUserInfo = () =>
   axios
