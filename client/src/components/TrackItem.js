@@ -81,7 +81,10 @@ const TrackDuration = styled.span`
 
 const TrackItem = ({ track, onClick, selected }) => (
   <li>
-    <TrackContainer onClick={onClick ?? null} style={{ border: selected ? '1px solid white' : '1px solid #00000000' }}>
+    <TrackContainer
+      onClick={onClick ?? null}
+      style={{ border: selected ? '1px solid white' : '1px solid #00000000' }}
+    >
       {track.album ? (
         <div>
           <TrackArtwork>
