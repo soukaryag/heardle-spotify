@@ -3,12 +3,8 @@ import { Link } from '@reach/router';
 
 import {
   IconSpotify,
-  IconUser,
-  IconTime,
-  IconMicrophone,
-  IconPlaylist,
-  IconMusic,
   IconGithub,
+  IconHome,
 } from './icons';
 
 import styled from 'styled-components/macro';
@@ -142,16 +138,16 @@ const Nav = () => (
     <Menu>
       <MenuItem>
         <NavLink to="/">
-          <IconUser />
-          <div>Profile</div>
+          <IconHome />
+          <div>Home</div>
         </NavLink>
       </MenuItem>
-      <MenuItem>
+      {/* <MenuItem>
         <NavLink to="artists">
           <IconMicrophone />
           <div>Top Artists</div>
         </NavLink>
-      </MenuItem>
+      </MenuItem> */}
       {/* <MenuItem>
         <NavLink to="tracks">
           <IconMusic />

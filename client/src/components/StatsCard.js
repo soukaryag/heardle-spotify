@@ -23,7 +23,7 @@ const StatsCard = ({ stat, label, icon, subtext }) => (
           {stat === 0
             ? 0
             : stat < 1
-            ? stat.toFixed(2)
+            ? stat.toFixed(1)
             : stat < 10000
             ? formatWithCommas(stat)
             : formatLargeNumber(stat)}

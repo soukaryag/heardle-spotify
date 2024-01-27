@@ -36,7 +36,7 @@ const LoginButton = styled.a`
 
 const LoginScreen = () => (
   <Login>
-    <h1>Spotify Profile</h1>
+    <h1>Spotify Heardle</h1>
     <LoginButton href={LOGIN_URI}>Log in to Spotify</LoginButton>
   </Login>
 );

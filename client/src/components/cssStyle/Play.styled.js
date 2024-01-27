@@ -123,6 +123,14 @@ export const ArtistName = styled.a`
         font-size: 80px;
     `};
 `;
+export const ArtistNameLink = styled(Link)`
+  display: inline;
+  font-weight: 700;
+  &:hover {
+    color: ${colors.green};
+  }
+  font-size: ${fontSizes.sm};
+`;
 export const VerifiedArtistContainer = styled.div`
   display: flex;
   flex-direction: row;

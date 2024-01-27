@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from '@reach/router';
-import { getUserInfo, getSearchArists, logout } from '../spotify';
+import { getTopArtistsShort, getTopArtistsMedium, getTopArtistsLong, getUserInfo, getSearchArists, logout } from '../spotify';
 import { catchErrors } from '../utils';
 
-import { IconUser, IconInfo } from './icons';
+import { IconUser,  IconPlay } from './icons';
 import Loader from './Loader';
 
 import styled from 'styled-components/macro';
@@ -169,7 +169,7 @@ const SpotifySearchContainer = styled.div`
   align-items: center;
   min-width: 360px;
   position: relative;
-  margin: 50px auto 100px auto;
+  margin: 50px auto;
   width: 300px;
   ${media.tablet`
     width: 200px;
@@ -195,10 +195,36 @@ const SpotifySearch = styled.input`
     border: 2px solid ${colors.white};
   }
 `;
+const Ranges = styled.div`
+  display: flex;
+  margin-right: -11px;
+  ${media.tablet`
+    justify-content: space-around;
+    margin: 30px 0 0;
+  `};
+`;
+const RangeButton = styled.button`
+  background-color: transparent;
+  color: ${props => (props.isActive ? colors.white : colors.lightGrey)};
+  font-size: ${fontSizes.base};
+  font-weight: 500;
+  padding: 10px;
+  ${media.phablet`
+    font-size: ${fontSizes.sm};
+  `};
+  span {
+    padding-bottom: 2px;
+    border-bottom: 1px solid ${props => (props.isActive ? colors.white : `transparent`)};
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+`;
 
 const User = () => {
   const [user, setUser] = useState(null);
   const [artistsSearched, setArtistsSearched] = useState(null);
+  const [topArtists, setTopArtists] = useState(null);
+  const [activeRange, setActiveRange] = useState('long');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -221,6 +247,28 @@ const User = () => {
     };
     catchErrors(fetchDataArtists());
   };
+
+  const apiCalls = {
+    long: getTopArtistsLong(),
+    medium: getTopArtistsMedium(),
+    short: getTopArtistsShort(),
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data } = await getTopArtistsLong();
+      setTopArtists(data);
+    };
+    catchErrors(fetchData());
+  }, []);
+
+  const changeRange = async range => {
+    const { data } = await apiCalls[range];
+    setTopArtists(data);
+    setActiveRange(range);
+  };
+
+  const setRangeData = range => catchErrors(changeRange(range));
 
   return (
     <React.Fragment>
@@ -265,27 +313,74 @@ const User = () => {
             />
           </SpotifySearchContainer>
 
-          <ArtistsContainer>
-            {artistsSearched
-              ? artistsSearched.items.map(({ id, external_urls, images, name }, i) =>
-                  id && external_urls && images && images.length > 0 && name ? (
-                    <Artist key={i}>
-                      <ArtistArtwork to={`/play/artist/${id}`}>
-                        {images.length > 1 ? (
-                          <img src={images[1].url} alt="Artist" />
-                        ) : images.length > 0 ? (
-                          <img src={images[0].url} alt="Artist" />
-                        ) : null}
-                        <Mask>
-                          <IconInfo />
-                        </Mask>
-                      </ArtistArtwork>
-                      <ArtistName>{name}</ArtistName>
-                    </Artist>
-                  ) : null,
-                )
-              : null}
-          </ArtistsContainer>
+          
+          {artistsSearched
+            ? (
+              <div>
+                <Header style={{ marginBottom: '95px' }}>
+                  <h2>Search Results</h2>
+                </Header>
+              
+                <ArtistsContainer>
+                  
+                  {artistsSearched.items.map(({ id, external_urls, images, name }, i) =>
+                    id && external_urls && images && images.length > 0 && name ? (
+                      <Artist key={i}>
+                        <ArtistArtwork to={`/play/artist/${id}`}>
+                          {images.length > 1 ? (
+                            <img src={images[1].url} alt="Artist" />
+                          ) : images.length > 0 ? (
+                            <img src={images[0].url} alt="Artist" />
+                          ) : null}
+                          <Mask>
+                            <IconPlay />
+                          </Mask>
+                        </ArtistArtwork>
+                        <ArtistName>{name}</ArtistName>
+                      </Artist>
+                    ) : null,
+                  )}
+                </ArtistsContainer>
+              </div>
+            )
+            : (
+              <div>
+                <Header>
+                  <h2>Your Top Artists</h2>
+                  <Ranges>
+                    <RangeButton isActive={activeRange === 'long'} onClick={() => setRangeData('long')}>
+                      <span>All Time</span>
+                    </RangeButton>
+                    <RangeButton isActive={activeRange === 'medium'} onClick={() => setRangeData('medium')}>
+                      <span>Last 6 Months</span>
+                    </RangeButton>
+                    <RangeButton isActive={activeRange === 'short'} onClick={() => setRangeData('short')}>
+                      <span>Last 4 Weeks</span>
+                    </RangeButton>
+                  </Ranges>
+                </Header>
+                <ArtistsContainer>
+                  {topArtists ? (
+                    topArtists.items.map(({ id, external_urls, images, name }, i) => (
+                      <Artist key={i}>
+                        <ArtistArtwork to={`/artist/${id}`}>
+                          {images.length && <img src={images[1].url} alt="Artist" />}
+                          <Mask>
+                            <IconPlay />
+                          </Mask>
+                        </ArtistArtwork>
+                        <ArtistName href={external_urls.spotify} target="_blank" rel="noopener noreferrer">
+                          {name}
+                        </ArtistName>
+                      </Artist>
+                    ))
+                  ) : (
+                    <Loader />
+                  )}
+                </ArtistsContainer>
+              </div>
+            )}
+          
         </Main>
       ) : (
         <Loader />

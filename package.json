@@ -1,7 +1,7 @@
 {
   "name": "spotify-profile",
   "version": "0.1.0",
-  "description": "Spotify Profile",
+  "description": "Spotify Heardle",
   "main": "server/index.js",
   "repository": {
     "type": "git"

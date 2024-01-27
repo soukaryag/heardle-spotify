@@ -4,7 +4,6 @@ import { Router } from '@reach/router';
 import ScrollToTop from './ScrollToTop';
 import Nav from './Nav';
 import User from './User';
-import TopArtists from './TopArtists';
 import TopTracks from './TopTracks';
 import Play from './Play';
 import PlayV2 from './PlayV2';
@@ -28,7 +27,7 @@ const Profile = () => (
     <Router primary={false}>
       <ScrollToTop path="/">
         <User path="/" />
-        <TopArtists path="artists" />
+        {/* <TopArtists path="artists" /> */}
         <TopTracks path="tracks" />
         {/* <Play path="play/artist/:artistId" /> */}
         <Artist path="artist/:artistId" />

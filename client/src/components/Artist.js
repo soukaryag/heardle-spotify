@@ -173,7 +173,6 @@ const Artist = props => {
         total_guesses: 0,
         id: artistId,
       };
-      console.log('!!!', db);
       setStatsForArtist(db[artistId]);
       setDatabase(db);
     } else {
@@ -449,7 +448,10 @@ const Artist = props => {
           ) : (
             <BodyContainer>
               <ActionsContainer>
-                <StartButton to={`/play/artist/${artistId}?device_id=${deviceId}`} disabled={!deviceId}>
+                <StartButton
+                  to={`/play/artist/${artistId}?device_id=${deviceId}`}
+                  disabled={!deviceId}
+                >
                   Start Game
                 </StartButton>
                 <InfoButtonContainer

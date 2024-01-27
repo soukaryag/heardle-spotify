@@ -19,6 +19,8 @@ import IconForward from './forward';
 import IconTrophy from './trophy';
 import IconLoss from './loss';
 import IconBrain from './brain';
+import IconHome from './home';
+
 
 export {
   IconUser,
@@ -42,4 +44,5 @@ export {
   IconTrophy,
   IconLoss,
   IconBrain,
+  IconHome,
 };
