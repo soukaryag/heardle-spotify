@@ -315,7 +315,7 @@ const User = () => {
 
           <SpotifySearchContainer>
             <SpotifySearch
-              placeholder="Who do you want to heardle?"
+              placeholder="Search an artist to heardle!"
               onChange={e => updateSearchText(e.target.value)}
             />
           </SpotifySearchContainer>

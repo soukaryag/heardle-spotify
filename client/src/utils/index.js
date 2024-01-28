@@ -97,10 +97,7 @@ export const formatPlaybackTime = milliseconds => {
   const seconds = Math.floor((milliseconds / 1000) % 60);
   const minutes = Math.floor((milliseconds / 1000 / 60) % 60);
 
-  return [
-      minutes.toString().padStart(1, "0"),
-      seconds.toString().padStart(2, "0")
-  ].join(":");
+  return [minutes.toString().padStart(1, '0'), seconds.toString().padStart(2, '0')].join(':');
 };
 
 // Higher-order function for async/await error handling

@@ -278,11 +278,11 @@ export const getAllAlbumsByArtist = artistId =>
 export const getAllTracksByAlbum = albumId =>
   axios.get(`https://api.spotify.com/v1/albums/${albumId}/tracks`, { headers });
 
-export const startPlayback = async (trackId, deviceId) => {
+export const startPlayback = async (trackId, deviceId, startPosition = 0) => {
   const url = `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`;
   const data = JSON.stringify({
     uris: [`spotify:track:${trackId}`],
-    position_ms: 0,
+    position_ms: startPosition,
     device_id: deviceId,
   });
   axios({

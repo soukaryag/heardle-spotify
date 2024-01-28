@@ -242,6 +242,13 @@ export const ActionsContainer = styled.div`
         justify-content: space-between;
     `};
 `;
+export const ButtonsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  ${media.tablet`
+    flex-direction: column;
+    `};
+`;
 export const StartButton = styled(Link)`
   display: inline-block;
   background-color: ${colors.green};
@@ -249,6 +256,7 @@ export const StartButton = styled(Link)`
   border-radius: 30px;
   padding: 17px 35px;
   min-width: 160px;
+  max-width: 225px;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -257,9 +265,27 @@ export const StartButton = styled(Link)`
   &:focus {
     background-color: ${colors.offGreen};
   }
-  &:disabled {
-    background-color: ${colors.grey};
+`;
+export const StartButtonSecondary = styled(Link)`
+  display: inline-block;
+  background-color: transparent;
+  color: ${colors.white};
+  border-radius: 30px;
+  padding: 17px 35px;
+  min-width: 160px;
+  max-width: 225px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+  border: 2px solid ${colors.green};
+  &:hover,
+  &:focus {
+    background-color: ${colors.green}44;
   }
+  ${media.tablet`
+    margin-top: 12px;
+    `};
 `;
 export const StartButtonDisabled = styled.a`
   display: inline-block;

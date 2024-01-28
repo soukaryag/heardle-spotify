@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import ConfettiExplosion from 'react-confetti-explosion';
 import { ColorExtractor } from 'react-color-extractor';
-import ProgressBar from "@ramonak/react-progress-bar";
+import ProgressBar from '@ramonak/react-progress-bar';
 import { formatForSearch, formatPlaybackTime, catchErrors } from '../utils';
 import {
   getAllAlbumsByArtist,
@@ -166,7 +166,7 @@ const PlayV2 = props => {
         toAdd[e.id] = data.images[0].url;
         setCurrentTrackArtistPictures(prevState => ({ ...prevState, ...toAdd }));
       });
-      setTimeLeft(pickedTrack.duration_ms)
+      setTimeLeft(pickedTrack.duration_ms);
       setCurrentTrack(pickedTrack);
     };
 
@@ -195,7 +195,7 @@ const PlayV2 = props => {
     setLoser(false);
     pausePlayback(deviceId);
     setTimeLeft(null);
-    setProgressBarPercent(0)
+    setProgressBarPercent(0);
     setTrackIsPlaying(false);
     setDisplayedTracks(false);
     setGuesses([]);
@@ -209,49 +209,33 @@ const PlayV2 = props => {
     }
   }, []);
 
-//   useEffect(() => {
-//     // when track is selected, play it
-//     if (playbackTimeStart) {
-//         setPlaybackTimeElapsed(new Date() - playbackTimeStart);
-//     }
-//   }, [playbackTimeStart, playbackTimeElapsed]);
+  useEffect(() => {
+    if (trackIsPlaying && currentTrack && currentTrack.duration_ms) {
+      timerId.current = window.setInterval(() => {
+        setTimeLeft(prevProgress => prevProgress - 1000);
+      }, 1000);
 
-    useEffect(() => {
-        console.log('ONE');
-        if (trackIsPlaying && currentTrack && currentTrack.duration_ms) {
-            timerId.current = window.setInterval(() => {
-                setTimeLeft((prevProgress) => prevProgress - 1000);
-            }, 1000);
+      return () => {
+        clearInterval(timerId.current);
+      };
+    }
+  }, [trackIsPlaying]);
 
-            console.log(timerId.current, timeLeft, currentTrack.duration_ms);
+  useEffect(() => {
+    if (trackIsPlaying && currentTrack && currentTrack.duration_ms) {
+      if (progressBarPercent < 100) {
+        let updateProgressPercent = Math.round(
+          ((currentTrack.duration_ms - (timeLeft - 1000)) / currentTrack.duration_ms) * 100,
+        );
+        setProgressBarPercent(updateProgressPercent);
+      }
 
-            return () => {
-                clearInterval(timerId.current);
-            };
-        } else {
-            console.log('!!!ONE');
-        }
-    }, [trackIsPlaying]);
-
-    useEffect(() => {
-        console.log('TWO');
-        if (trackIsPlaying && currentTrack && currentTrack.duration_ms) {
-            if (progressBarPercent < 100) {
-                let updateProgressPercent = Math.round(
-                    ((currentTrack.duration_ms - (timeLeft - 1000)) / currentTrack.duration_ms) * 100
-                );
-                console.log('p', updateProgressPercent);
-                setProgressBarPercent(updateProgressPercent);
-            }
-
-            if (timeLeft === 0 && timerId.current) {
-                clearInterval(timerId.current);
-                return;
-            }
-        } else {
-            console.log('!!!TWO');
-        }
-    }, [timeLeft]);
+      if (timeLeft === 0 && timerId.current) {
+        clearInterval(timerId.current);
+        return;
+      }
+    }
+  }, [timeLeft]);
 
   const displayTracks = text => {
     if (!text) {
@@ -277,13 +261,19 @@ const PlayV2 = props => {
 
   const playSong = timeLimit => {
     if (!currentTrack) return;
+    if (winner || loser) {
+        setTrackIsPlaying(true);
+        startPlayback(currentTrack.id, deviceId, currentTrack.duration_ms - timeLeft);
+        return;
+    }
+
     setTrackIsPlaying(true);
     startPlayback(currentTrack.id, deviceId);
     setTimeout(function () {
       pausePlayback(deviceId);
       setTrackIsPlaying(false);
-      setTimeLeft(currentTrack.duration_ms)
-      setProgressBarPercent(0)
+      setTimeLeft(currentTrack.duration_ms);
+      setProgressBarPercent(0);
     }, timeLimit ?? timeLimitsArray[guesses.length]);
   };
 
@@ -399,6 +389,28 @@ const PlayV2 = props => {
     }
   };
 
+    const handleUserKeyPress = useCallback((event, gameOver, currTrack, device) => {
+        const { key } = event;
+        if (gameOver) {
+            console.log(key);
+            if (key === 'r') {
+                window.location.reload();
+            } else if (key === 'i') {
+                window.open(`https://spotify-profile.herokuapp.com/track/${currTrack.id}`)
+            } else if (key === ' ' || key === 'Enter') {
+                pausePlayback(device);
+                setTrackIsPlaying(false);
+            } 
+        }
+    }, []);
+
+    useEffect(() => {
+        window.addEventListener("keydown", (e) => handleUserKeyPress(e, winner || loser, currentTrack, deviceId));
+        return () => {
+            window.removeEventListener("keydown", (e) => handleUserKeyPress(e, winner || loser, currentTrack, deviceId));
+        };
+    }, [handleUserKeyPress, winner, loser, currentTrack, deviceId]);
+
   return (
     <React.Fragment>
       {artist && user ? (
@@ -489,56 +501,58 @@ const PlayV2 = props => {
               </BannerHeader>
               <BodyContainer>
                 <ActionsContainer>
-                    <ContolsBarContainer>
-                        <ContolsBarTop>
-                            {(winner || loser) ? (
-                                <SecondaryButton to={`/track/${currentTrack.id}`}>
-                                    <IconMicrophone />
-                                </SecondaryButton>
-                            ) : (
-                                <SecondaryButtonDisabled>
-                                    <IconMicrophone />
-                                </SecondaryButtonDisabled>
-                            )}
-                            <PlayButton onClick={e => playSong()}>
-                                {trackIsPlaying ? (
-                                <IconPause style={{ marginTop: '4px', marginLeft: '3px' }} />
-                                ) : (
-                                <IconPlay />
-                                )}
-                            </PlayButton>
+                  <ContolsBarContainer>
+                    <ContolsBarTop>
+                      {winner || loser ? (
+                        <SecondaryButton to={`/track/${currentTrack.id}`}>
+                          <IconMicrophone />
+                        </SecondaryButton>
+                      ) : (
+                        <SecondaryButtonDisabled>
+                          <IconMicrophone />
+                        </SecondaryButtonDisabled>
+                      )}
+                      <PlayButton onClick={e => playSong()}>
+                        {trackIsPlaying ? (
+                          <IconPause />
+                        ) : (
+                          <IconPlay />
+                        )}
+                      </PlayButton>
 
-                            {(winner || loser) ? (
-                                <SecondaryButton
-                                    to={`/play/artist/${artistId}?device_id=${deviceId}`}
-                                    onClick={() => window.location.reload()}
-                                >
-                                    <IconReset />
-                                </SecondaryButton>
-                            ) : (
-                                <SecondaryButtonDisabled>
-                                    <IconReset />
-                                </SecondaryButtonDisabled>
-                            )}
-                        </ContolsBarTop>
-                        <PlaybackBar>
-                            <PlaybackTime>
-                                { timeLeft ? formatPlaybackTime(currentTrack.duration_ms - timeLeft) : '0:00' }
-                            </PlaybackTime>
-                            <PlaybackProgressBarContainer>
-                                <ProgressBar 
-                                    completed={ progressBarPercent ? progressBarPercent : 0 }
-                                    baseBgColor='hsla(0,0%,100%,.3)'
-                                    bgColor='#fff'
-                                    height='4px'
-                                    width='280px'
-                                />
-                            </PlaybackProgressBarContainer>
-                            <PlaybackTime>
-                                { (winner || loser) ? formatPlaybackTime(currentTrack.duration_ms) : '?:??' }
-                            </PlaybackTime>
-                        </PlaybackBar>
-                    </ContolsBarContainer>
+                      {winner || loser ? (
+                        <SecondaryButton
+                          to={`/play/artist/${artistId}?device_id=${deviceId}`}
+                          onClick={() => window.location.reload()}
+                        >
+                          <IconReset />
+                        </SecondaryButton>
+                      ) : (
+                        <SecondaryButtonDisabled>
+                          <IconReset />
+                        </SecondaryButtonDisabled>
+                      )}
+                    </ContolsBarTop>
+                    <PlaybackBar>
+                      <PlaybackTime>
+                        {timeLeft
+                          ? formatPlaybackTime(currentTrack.duration_ms - timeLeft)
+                          : '0:00'}
+                      </PlaybackTime>
+                      <PlaybackProgressBarContainer>
+                        <ProgressBar
+                          completed={progressBarPercent ? progressBarPercent : 0}
+                          baseBgColor="hsla(0,0%,100%,.3)"
+                          bgColor="#fff"
+                          height="4px"
+                          width="280px"
+                        />
+                      </PlaybackProgressBarContainer>
+                      <PlaybackTime>
+                        {winner || loser ? formatPlaybackTime(currentTrack.duration_ms) : '?:??'}
+                      </PlaybackTime>
+                    </PlaybackBar>
+                  </ContolsBarContainer>
                 </ActionsContainer>
                 <ContentContainer>
                   <LeftsideContainer>
