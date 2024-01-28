@@ -240,7 +240,7 @@ export const ActionsContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 16px 16px 0 16px;
+  padding: 0px 16px 0 16px;
   ${media.tablet`
         justify-content: space-between;
     `};
@@ -391,6 +391,10 @@ export const PlayButton = styled.a`
   &:hover,
   &:focus {
     background-color: ${colors.offGreen};
+  }
+  svg {
+    width: 50px;
+    height: 50px;
   }
 `;
 export const SecondaryButton = styled(Link)`

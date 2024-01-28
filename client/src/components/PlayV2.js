@@ -18,7 +18,7 @@ import Loader from './Loader';
 import TrackItem from './TrackItem';
 
 import { theme } from '../styles';
-import { IconPlay, IconMicrophone, IconReset, IconBack, IconForward } from './icons';
+import { IconPlay, IconMicrophone, IconReset, IconBack, IconForward, IconPause } from './icons';
 import {
   PageContainer,
   BannerHeader,
@@ -149,13 +149,13 @@ const PlayV2 = props => {
       while (!pickedTrack || history.includes(pickedTrack.id)) {
         pickedTrack = allTracks[Math.floor(Math.random() * allTracks.length)];
       }
-      
-      pickedTrack.artists.forEach(async (e) => {
+
+      pickedTrack.artists.forEach(async e => {
         const { data } = await getArtist(e.id);
         const toAdd = {};
-        toAdd[e.id] = data.images[0].url
-        setCurrentTrackArtistPictures(prevState => ({...prevState, ...toAdd}))
-      })
+        toAdd[e.id] = data.images[0].url;
+        setCurrentTrackArtistPictures(prevState => ({ ...prevState, ...toAdd }));
+      });
       setCurrentTrack(pickedTrack);
     };
 
@@ -436,7 +436,11 @@ const PlayV2 = props => {
                   )}
 
                   <PlayButton onClick={e => playSong()}>
-                    <IconPlay />
+                    { trackIsPlaying ? (
+                        <IconPause style={{ marginTop: '6px', marginLeft: '5px' }} />
+                    ) : (
+                        <IconPlay />
+                    )}
                   </PlayButton>
 
                   {(winner || loser) && (
@@ -545,7 +549,13 @@ const PlayV2 = props => {
                           >
                             <ArtistCardArtwork>
                               {artistsGuessed.includes(item.id) ? (
-                                <img src={currentTrackArtistPictures[item.id] ?? 'https://i.pinimg.com/474x/f1/da/a7/f1daa70c9e3343cebd66ac2342d5be3f.jpg'} alt="Artist Artwork" />
+                                <img
+                                  src={
+                                    currentTrackArtistPictures[item.id] ??
+                                    'https://i.pinimg.com/474x/f1/da/a7/f1daa70c9e3343cebd66ac2342d5be3f.jpg'
+                                  }
+                                  alt="Artist Artwork"
+                                />
                               ) : (
                                 <img
                                   src={
@@ -562,7 +572,7 @@ const PlayV2 = props => {
                               </ArtistCardName>
                             </ArtistCardInfo>
                           </ArtistCardContainer>
-                        ) : null
+                        ) : null,
                       )}
                     </ArtistCardsContainer>
                   </RightsideContainer>
