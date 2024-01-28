@@ -245,7 +245,8 @@ const Artist = props => {
                     <StatsCard
                       stat={
                         statsForArtist.attempts > 0
-                          ? statsForArtist.total_guesses / (statsForArtist.wins + statsForArtist.losses)
+                          ? statsForArtist.total_guesses /
+                            (statsForArtist.wins + statsForArtist.losses)
                           : 0
                       }
                       label={'Average Guess'}

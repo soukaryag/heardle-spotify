@@ -60,6 +60,7 @@ const PlayV2 = props => {
   const [artist, setArtist] = useState(null);
   const [tracks, setTracks] = useState([]);
   const [currentTrack, setCurrentTrack] = useState(null);
+  const [currentTrackArtistPictures, setCurrentTrackArtistPictures] = useState({});
   const [gradientColor, setGradientColor] = useState(colors.black);
 
   const timeLimitsArray = [1500, 2000, 4000, 8000, 16000, 32000];
@@ -148,7 +149,13 @@ const PlayV2 = props => {
       while (!pickedTrack || history.includes(pickedTrack.id)) {
         pickedTrack = allTracks[Math.floor(Math.random() * allTracks.length)];
       }
-      console.log(pickedTrack);
+      
+      pickedTrack.artists.forEach(async (e) => {
+        const { data } = await getArtist(e.id);
+        const toAdd = {};
+        toAdd[e.id] = data.images[0].url
+        setCurrentTrackArtistPictures(prevState => ({...prevState, ...toAdd}))
+      })
       setCurrentTrack(pickedTrack);
     };
 
@@ -188,11 +195,6 @@ const PlayV2 = props => {
       }
     }
   }, []);
-
-  const getArtistPicture = async id => {
-    const { data } = await getArtist(artistId);
-    return data.images[0].url;
-  };
 
   const displayTracks = text => {
     if (!text) {
@@ -523,47 +525,45 @@ const PlayV2 = props => {
                   </LeftsideContainer>
                   <RightsideContainer style={{ margin: 0, paddingTop: 0 }}>
                     <ArtistCardsContainer>
-                        <ArtistCardContainer
-                          id={`ArtistCardContainer${-1}`}
-                          key={`ArtistCardContainer${-1}`}
-                        >
-                          <ArtistCardArtwork>
-                            <img src={artist.images[0].url} alt="Artist Artwork" />
-                          </ArtistCardArtwork>
-                          <ArtistCardInfo>
-                            <ArtistCardLabel>Artist</ArtistCardLabel>
-                            <ArtistCardName>
-                              {artist.name}
-                            </ArtistCardName>
-                          </ArtistCardInfo>
-                        </ArtistCardContainer>
-                        {currentTrack.artists?.map((item, i) => (
-                            item.id === artistId ? null : (
-                                <ArtistCardContainer
-                                    id={`ArtistCardContainer${i}`}
-                                    key={`ArtistCardContainer${i}`}
-                                >
-                                    <ArtistCardArtwork>
-                                        { artistsGuessed.includes(item.id) ? (
-                                            <img src={getArtistPicture(item.id)} alt="Artist Artwork" />
-                                        ) : (
-                                            <img
-                                                src={
-                                                'https://i.pinimg.com/474x/f1/da/a7/f1daa70c9e3343cebd66ac2342d5be3f.jpg'
-                                                }
-                                                alt="Artist Artwork"
-                                            />
-                                        )}
-                                    </ArtistCardArtwork>
-                                    <ArtistCardInfo>
-                                        <ArtistCardLabel>Artist</ArtistCardLabel>
-                                        <ArtistCardName>
-                                            {artistsGuessed.includes(item.id) ? item.name : '???'}
-                                        </ArtistCardName>
-                                    </ArtistCardInfo>
-                                </ArtistCardContainer>
-                            )
-                        ))}
+                      <ArtistCardContainer
+                        id={`ArtistCardContainer${-1}`}
+                        key={`ArtistCardContainer${-1}`}
+                      >
+                        <ArtistCardArtwork>
+                          <img src={artist.images[0].url} alt="Artist Artwork" />
+                        </ArtistCardArtwork>
+                        <ArtistCardInfo>
+                          <ArtistCardLabel>Artist</ArtistCardLabel>
+                          <ArtistCardName>{artist.name}</ArtistCardName>
+                        </ArtistCardInfo>
+                      </ArtistCardContainer>
+                      {currentTrack.artists?.map((item, i) =>
+                        item.id !== artistId ? (
+                          <ArtistCardContainer
+                            id={`ArtistCardContainer${i}`}
+                            key={`ArtistCardContainer${i}`}
+                          >
+                            <ArtistCardArtwork>
+                              {artistsGuessed.includes(item.id) ? (
+                                <img src={currentTrackArtistPictures[item.id] ?? 'https://i.pinimg.com/474x/f1/da/a7/f1daa70c9e3343cebd66ac2342d5be3f.jpg'} alt="Artist Artwork" />
+                              ) : (
+                                <img
+                                  src={
+                                    'https://i.pinimg.com/736x/fd/b6/de/fdb6dea1b13458837c6e56361d2c2771.jpg'
+                                  }
+                                  alt="Artist Artwork"
+                                />
+                              )}
+                            </ArtistCardArtwork>
+                            <ArtistCardInfo>
+                              <ArtistCardLabel>Artist</ArtistCardLabel>
+                              <ArtistCardName>
+                                {artistsGuessed.includes(item.id) ? item.name : '???'}
+                              </ArtistCardName>
+                            </ArtistCardInfo>
+                          </ArtistCardContainer>
+                        ) : null
+                      )}
                     </ArtistCardsContainer>
                   </RightsideContainer>
                 </ContentContainer>

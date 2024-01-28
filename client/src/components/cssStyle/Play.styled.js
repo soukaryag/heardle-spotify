@@ -461,46 +461,60 @@ export const ArtistCardsContainer = styled.div`
 `;
 
 export const ArtistCardContainer = styled.div`
-    display: flex;
-    flex-direction: row;
-    min-width: 350px;
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 5px;
-    &:hover {
-        background-color: ${colors.grey}55;
-    }
+  display: flex;
+  flex-direction: row;
+  min-width: 350px;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 5px;
+  &:hover {
+    background-color: ${colors.grey}55;
+  }
+  ${media.tablet`
+        margin-bottom: 2px;
+    `}
 `;
 
 export const ArtistCardArtwork = styled.div`
+  border-radius: 100%;
+  margin-right: 10px;
+  img {
+    object-fit: cover;
     border-radius: 100%;
-    margin-right: 10px;
-    img {
-        object-fit: cover;
-        border-radius: 100%;
-        width: 70px;
-        height: 70px;
-        box-shadow: 0 4px 60px rgba(0,0,0,.5);
-    }
+    width: 70px;
+    height: 70px;
+    box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
+    ${media.tablet`
+        width: 30px;
+        height: 30px;
+    `}
+  }
 `;
 
 export const ArtistCardInfo = styled.div`
-    margin: auto 0;
-    display: flex;
-    flex-direction: column;
+  margin: auto 0;
+  display: flex;
+  flex-direction: column;
 `;
 
 export const ArtistCardLabel = styled.a`
-    font-weight: 500;
-    font-size: ${fontSizes.xs};
-    margin-bottom: 5px;
+  font-weight: 500;
+  font-size: ${fontSizes.xs};
+  margin-bottom: 5px;
+  ${media.tablet`
+        margin-bottom: 2px;
+        font-size: 10px;
+    `}
 `;
 
 export const ArtistCardName = styled.a`
-    font-weight: 700;
-    curosr: pointer;
-    &:hover {
-        color: ${colors.green};
-    }
-    font-size: 15px;
+  font-weight: 700;
+  curosr: pointer;
+  font-size: 15px;
+  &:hover {
+    color: ${colors.green};
+  }
+  ${media.tablet`
+        font-size: 14px;
+    `}
 `;
