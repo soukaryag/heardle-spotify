@@ -22,7 +22,6 @@ import IconBrain from './brain';
 import IconHome from './home';
 import IconPause from './pause';
 
-
 export {
   IconUser,
   IconGithub,

@@ -44,6 +44,7 @@ import {
   RightsideContainer,
   ActionsContainer,
   StartButton,
+  StartButtonDisabled,
   InfoButtonContainer,
   StatsContainer,
   StatsParentContainer,
@@ -172,13 +173,25 @@ const Artist = props => {
             </AristContainer>
           </BannerHeader>
           <BodyContainer>
-            <ActionsContainer>
-              <StartButton
-                to={`/play/artist/${artistId}?device_id=${deviceId}`}
-                disabled={!deviceId}
-              >
-                Start Game
-              </StartButton>
+            <ActionsContainer style={{ paddingTop: '16px' }}>
+              { deviceId && artist ? (
+                <StartButton
+                  to={`/play/artist/${artistId}?device_id=${deviceId}`}
+                >
+                  Start Game
+                </StartButton>
+              ) : (
+                <div>
+                  <StartButtonDisabled>
+                    Start Game
+                  </StartButtonDisabled>
+                  <p style={{ color: colors.error, fontSize: fontSizes.sm, fontWeight: 400, margin: '3px 0 0 12px', position: 'absolute' }}>
+                    Please select a device first
+                  </p>
+                </div>
+                
+              )}
+              
               <InfoButtonContainer
                 onClick={e => console.log('Popup with how to play')}
                 style={{ marginLeft: '15px' }}
@@ -300,7 +313,17 @@ const Artist = props => {
                         margin: '10px 0 20px 0',
                       }}
                     >
-                      No devices available! Try opening spotify
+                      No devices available! Try 
+                      <a style={{ color: colors.green }}
+                        onClick={e => {
+                          window.open('https://open.spotify.com/')
+                          new Promise((resolve) => setTimeout(resolve, 1000)).then(() => {
+                            window.location.reload()
+                          })
+                        }}
+                      >
+                        opening Spotify
+                      </a>
                     </div>
                   )}
                   <DeviceHelpContainer

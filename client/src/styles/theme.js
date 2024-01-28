@@ -12,6 +12,7 @@ const theme = {
     darkGrey: '#282828',
     transparent: '#00000000',
     red: '#ff090b',
+    error: '#FF9494',
   },
 
   fonts: {

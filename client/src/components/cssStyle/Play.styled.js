@@ -240,7 +240,7 @@ export const ActionsContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 0px 16px 0 16px;
+  padding: 0px 16px 5px 16px;
   ${media.tablet`
         justify-content: space-between;
     `};
@@ -263,6 +263,19 @@ export const StartButton = styled(Link)`
   &:disabled {
     background-color: ${colors.grey};
   }
+`;
+export const StartButtonDisabled = styled.a`
+    display: inline-block;
+    background-color: ${colors.grey};
+    color: ${colors.white};
+    border-radius: 30px;
+    padding: 17px 35px;
+    min-width: 160px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    cursor: not-allowed;
 `;
 export const InfoButtonContainer = styled.a`
   align-items: center;

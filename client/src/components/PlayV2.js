@@ -436,10 +436,10 @@ const PlayV2 = props => {
                   )}
 
                   <PlayButton onClick={e => playSong()}>
-                    { trackIsPlaying ? (
-                        <IconPause style={{ marginTop: '6px', marginLeft: '5px' }} />
+                    {trackIsPlaying ? (
+                      <IconPause style={{ marginTop: '6px', marginLeft: '5px' }} />
                     ) : (
-                        <IconPlay />
+                      <IconPlay />
                     )}
                   </PlayButton>
 
