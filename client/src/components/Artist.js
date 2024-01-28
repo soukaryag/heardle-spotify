@@ -317,11 +317,11 @@ const Artist = props => {
                           }}
                         >
                           {device.type === 'Computer' ? (
-                            <IconComputer />
+                            <IconComputer style={{ width: '28px', height: '28px' }} />
                           ) : device.type === 'Smartphone' ? (
-                            <IconPhone />
+                            <IconPhone style={{ width: '28px', height: '28px' }} />
                           ) : device.type === 'CastAudio' ? (
-                            <IconSpeaker />
+                            <IconSpeaker style={{ width: '28px', height: '28px' }} />
                           ) : (
                             <p>?</p>
                           )}
