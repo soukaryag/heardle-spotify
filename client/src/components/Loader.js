@@ -34,7 +34,7 @@ const Bar = styled.div`
   width: 10px;
   height: 5px;
   margin: 0 2px;
-  background-color: ${colors.grey};
+  background-color: ${colors.white};
   animation-name: ${dance};
   animation-duration: 400ms;
   animation-play-state: running;

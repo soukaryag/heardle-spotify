@@ -5,7 +5,6 @@ import ScrollToTop from './ScrollToTop';
 import Nav from './Nav';
 import User from './User';
 import TopTracks from './TopTracks';
-import Play from './Play';
 import PlayV2 from './PlayV2';
 import Artist from './Artist';
 import Track from './Track';

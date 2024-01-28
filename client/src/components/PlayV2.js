@@ -1,15 +1,14 @@
-import React, { useState, useEffect, useSearchParams } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ConfettiExplosion from 'react-confetti-explosion';
 import { ColorExtractor } from 'react-color-extractor';
-import { formatWithCommas, formatLargeNumber, catchErrors } from '../utils';
+import { formatForSearch, catchErrors } from '../utils';
 import {
   getAllAlbumsByArtist,
   getAllTracksByAlbum,
   getArtist,
   startPlayback,
   pausePlayback,
-  getAllDevices,
   getDatabase,
   setDatabase,
   getUserInfo,
@@ -19,7 +18,7 @@ import Loader from './Loader';
 import TrackItem from './TrackItem';
 
 import { theme } from '../styles';
-import { IconPlay, IconMicrophone, IconReset, IconVerified, IconBack, IconForward } from './icons';
+import { IconPlay, IconMicrophone, IconReset, IconBack, IconForward } from './icons';
 import {
   PageContainer,
   BannerHeader,
@@ -28,7 +27,7 @@ import {
   ButtonContainer,
   LinkContainer,
   AristContainer,
-  Artwork,
+  ArtworkSmall,
   AlbumArtwork,
   ArtistInfoContainer,
   VerifiedArtistContainer,
@@ -44,31 +43,40 @@ import {
   GuessContainer,
   GuessInput,
   TracksContainer,
+  ArtistCardsContainer,
+  ArtistCardContainer,
+  ArtistCardArtwork,
+  ArtistCardInfo,
+  ArtistCardLabel,
+  ArtistCardName
 } from './cssStyle/Play.styled';
-const { colors, fontSizes, fonts, spacing } = theme;
+const { colors, fontSizes } = theme;
 
 const PlayV2 = props => {
   const { artistId } = props;
 
+  const deviceId = props.location.search.split('=')[1] ?? null;
+
   const [artist, setArtist] = useState(null);
   const [tracks, setTracks] = useState([]);
   const [currentTrack, setCurrentTrack] = useState(null);
-  const [deviceId, setDeviceId] = useState(props.location.search.split('=')[1] ?? null);
-  const [gradientColor, setGradientColor] = useState(colors.green);
+  const [gradientColor, setGradientColor] = useState(colors.black);
 
   const timeLimitsArray = [1500, 2000, 4000, 8000, 16000, 32000];
   const [guesses, setGuesses] = useState([]);
   const [displayedTracks, setDisplayedTracks] = useState(null);
-  const [trackPlaying, setTrackPlaying] = useState(false);
+  const [trackIsPlaying, setTrackIsPlaying] = useState(false);
   const [winner, setWinner] = useState(false);
   const [loser, setLoser] = useState(false);
 
   const [albumGuessed, setAlbumGuessed] = useState(false);
+  const [artistsGuessed, setArtistsGuessed] = useState([]);
   const [trackSelectedFromSearch, setTrackSelectedFromSearch] = useState(0);
 
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    // fetches user data - can be stored in state from the start (rework)
     const fetchData = async () => {
       const { user } = await getUserInfo();
       setUser(user);
@@ -77,6 +85,7 @@ const PlayV2 = props => {
   }, []);
 
   useEffect(() => {
+    // Checks if guesses >= LIMIT when guesses array updates and sets loss state apporiately
     if (guesses.length >= 5 && !winner) {
       console.log('You lost!');
       setDisplayedTracks([currentTrack]);
@@ -85,57 +94,92 @@ const PlayV2 = props => {
       let db = getDatabase();
       db[artistId].losses = db[artistId].losses + 1;
       db[artistId].total_guesses = db[artistId].total_guesses + guesses.length;
+      db[artistId].last_5_songs.push(currentTrack);
+      if (db[artistId].last_5_songs.length > 5) {
+        db[artistId].last_5_songs.pop();
+      }
       setDatabase(db);
     }
   }, [guesses]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data } = await getAllAlbumsByArtist(artistId);
-      data.items.forEach(async ({ id, images, name }) => {
+  const fetchAllTracks = async (items) => {
+    const allTracks = [];
+    
+    for await (const { id, images, name } of items) {
         if (name.toLowerCase().includes('remix') || name.toLowerCase().includes('live')) {
-          return;
+            continue;
         }
         const { data } = await getAllTracksByAlbum(id);
         let additionalTracks = data.items ?? [];
         additionalTracks = additionalTracks.filter(function (el) {
-          return (
-            !el.name.toLowerCase().includes('remix') && !el.name.toLowerCase().includes('live')
-          );
+            return (
+                !el.name.toLowerCase().includes('remix') 
+                    && !el.name.toLowerCase().includes('live')
+            );
         });
         additionalTracks = additionalTracks.map(obj => ({
-          ...obj,
-          album: {
-            id,
-            images,
-            name,
-          },
+            ...obj,
+            album: {
+                id,
+                images,
+                name,
+            },
         }));
-        setTracks(oldTracks => [...oldTracks, ...additionalTracks]);
-      });
+
+        allTracks.push(...additionalTracks);
     };
+
+    // remove any duplicate song (in the case a track appears as single AND in album)
+    return allTracks.reduce((accumulator, current) => {
+        if (!accumulator.find((item) => item.name === current.name)) {
+            accumulator.push(current);
+        }
+        return accumulator;
+    }, []);
+  }
+
+  useEffect(() => {
+    // fetches all relevant tracks minus remixes and live renditions
+    const fetchData = async () => {
+        const { data } = await getAllAlbumsByArtist(artistId);
+        const allTracks = await fetchAllTracks(data.items);
+        setTracks(allTracks);
+
+        let db = getDatabase();
+        const history = db[artistId].last_5_songs ?? [];
+        let pickedTrack = null;
+        while (!pickedTrack || history.includes(pickedTrack.id)) {
+            pickedTrack = allTracks[Math.floor(Math.random() * allTracks.length)];
+        }
+        console.log(pickedTrack)
+        setCurrentTrack(pickedTrack);
+    };
+
     catchErrors(fetchData());
   }, [artistId]);
 
   useEffect(() => {
+    // gets artist data and set's page name
     const fetchData = async () => {
       const { data } = await getArtist(artistId);
       setArtist(data);
       document.title = `${data?.name} | Heardle`;
+      setArtistsGuessed([data.id]);
     };
     catchErrors(fetchData());
   }, [artistId]);
 
   useEffect(() => {
-    const random = Math.floor(Math.random() * tracks.length);
-    setCurrentTrack(tracks[random]);
-  }, [tracks]);
+    // when track is selected, play it
+    playSong();
+  }, [currentTrack]);
 
   useEffect(() => {
+    // initially sets up the game state
     setWinner(false);
     setLoser(false);
     pausePlayback(deviceId);
-    setTrackPlaying(false);
+    setTrackIsPlaying(false);
     setDisplayedTracks(false);
     setGuesses([]);
     for (let i = 0; i < 5; i++) {
@@ -148,6 +192,11 @@ const PlayV2 = props => {
     }
   }, []);
 
+  const getArtistPicture = async (id) => {
+    const { data } = await getArtist(artistId);
+    return data.images[0].url
+  }
+
   const displayTracks = text => {
     if (!text) {
       setDisplayedTracks([]);
@@ -156,7 +205,7 @@ const PlayV2 = props => {
 
     const matchedTracks = tracks.filter(
       function (el) {
-        if (this.count < 5 && el.name.toLowerCase().includes(text)) {
+        if (this.count < 5 && formatForSearch(el.name).includes(formatForSearch(text))) {
           this.count++;
           return true;
         }
@@ -171,11 +220,12 @@ const PlayV2 = props => {
   };
 
   const playSong = timeLimit => {
-    setTrackPlaying(true);
+    if (!currentTrack) return;
+    setTrackIsPlaying(true);
     startPlayback(currentTrack.id, deviceId);
     setTimeout(function () {
       pausePlayback(deviceId);
-      setTrackPlaying(false);
+      setTrackIsPlaying(false);
     }, timeLimit ?? timeLimitsArray[guesses.length]);
   };
 
@@ -183,8 +233,6 @@ const PlayV2 = props => {
     const currId = guesses.length;
     const inputElement = document.getElementById(`guess${currId}`);
     inputElement.value = track.name;
-
-    // For debugging console.log(track.name, currentTrack.name);
 
     if (currId === 0) {
       let db = getDatabase();
@@ -201,6 +249,7 @@ const PlayV2 = props => {
           losses: 0,
           total_guesses: 0,
           id: artistId,
+          last_5_songs: [],
         };
       }
       setDatabase(db);
@@ -208,9 +257,16 @@ const PlayV2 = props => {
 
     setDisplayedTracks([]);
 
+    // update guessed ui elements
     if (track.album.name === currentTrack.album.name) {
       setAlbumGuessed(true);
     }
+
+    track.artists.forEach(item => {
+        if (item.id !== artistId && currentTrack.artists.filter(e => e.id === item.id).length > 0) {
+            setArtistsGuessed(oldGuessed => [...oldGuessed, item.id]);
+        }
+    })
 
     if (
       track.name === currentTrack.name ||
@@ -227,6 +283,10 @@ const PlayV2 = props => {
       let db = getDatabase();
       db[artistId].wins = db[artistId].wins + 1;
       db[artistId].total_guesses = db[artistId].total_guesses + currId + 1;
+      db[artistId].last_5_songs.push(currentTrack.id);
+      if (db[artistId].last_5_songs.length > 5) {
+        db[artistId].last_5_songs.shift();
+      }
       setDatabase(db);
     } else if (track.album?.name === currentTrack.album.name) {
       // same album
@@ -239,11 +299,28 @@ const PlayV2 = props => {
       playSong(timeLimitsArray[currId + 1]);
       setGuesses(currGuesses => [...currGuesses, track.name]);
     }
+
+    if (currId < 3) {
+        const nextInputElement = document.getElementById(`guess${currId + 1}`);
+        if (nextInputElement) {
+            nextInputElement.focus();
+        } else {
+            console.log(`guess${currId + 1}`)
+        }
+    }
   };
 
   const handleKeyPress = e => {
-    if (e.key === 'Enter') {
-      checkGuess(displayedTracks[trackSelectedFromSearch]);
+    if (winner || loser) {
+        return
+    }
+
+    if (e.key === 'Control') {
+        playSong();
+    } else if (e.key === 'Enter') {
+        if (trackSelectedFromSearch < displayedTracks.length) {
+            checkGuess(displayedTracks[trackSelectedFromSearch]);
+        }
     } else if (e.key === 'ArrowUp') {
       setTrackSelectedFromSearch(e => {
         if (e > 0) {
@@ -332,13 +409,20 @@ const PlayV2 = props => {
                         alignItems: 'center',
                       }}
                     >
-                      <Artwork style={{ width: '20px', height: '20px', marginRight: '10px' }}>
+                        {winner && (
+                            <ConfettiExplosion
+                                duration={5000}
+                                particleCount={200}
+                                onComplete={e => console.log('DONE!')}
+                            />
+                        )}
+                      <ArtworkSmall style={{ width: '20px', height: '20px', marginRight: '10px' }}>
                         <img
                           style={{ width: '20px', height: '20px' }}
                           src={artist.images[1].url}
                           alt="Artist Artwork"
                         />
-                      </Artwork>
+                      </ArtworkSmall>
                       <ArtistNameLink to={`/artist/${artistId}`}>{artist.name}</ArtistNameLink>
                     </div>
                   </ArtistInfoContainer>
@@ -354,18 +438,11 @@ const PlayV2 = props => {
 
                   <PlayButton onClick={e => playSong()}>
                     <IconPlay />
-                    {winner && (
-                      <ConfettiExplosion
-                        duration={5000}
-                        particleCount={200}
-                        onComplete={e => console.log('DONE!')}
-                      />
-                    )}
                   </PlayButton>
 
                   {(winner || loser) && (
                     <SecondaryButton
-                      to={`/artist/${artistId}`}
+                      to={`/play/artist/${artistId}?device_id=${deviceId}`}
                       onClick={() => window.location.reload()}
                     >
                       <IconReset />
@@ -375,27 +452,27 @@ const PlayV2 = props => {
                 <ContentContainer>
                   <LeftsideContainer>
                     <GuessContainer>
-                      <GuessInput
-                        id="guess0"
-                        key="guess0"
-                        autoComplete="off"
-                        placeholder="Type your guess..."
-                        onChange={e => displayTracks(e.target.value.toLowerCase())}
-                        onKeyUp={handleKeyPress}
-                        disabled={guesses.length > 0}
-                      />
-                      {guesses.length > 0 ? (
                         <GuessInput
-                          id="guess1"
-                          key="guess1"
-                          autoComplete="off"
-                          placeholder="Type your guess..."
-                          onChange={e => displayTracks(e.target.value.toLowerCase())}
-                          onKeyUp={handleKeyPress}
-                          disabled={guesses.length > 1}
+                            id="guess0"
+                            key="guess0"
+                            autoComplete="off"
+                            placeholder="Type your guess..."
+                            onChange={e => displayTracks(e.target.value.toLowerCase())}
+                            onKeyUp={handleKeyPress}
+                            disabled={guesses.length > 0}
+                            autoFocus={guesses.length === 0}
                         />
-                      ) : null}
-                      {guesses.length > 1 ? (
+                        <GuessInput
+                            id="guess1"
+                            key="guess1"
+                            autoComplete="off"
+                            placeholder="Type your guess..."
+                            onChange={e => displayTracks(e.target.value.toLowerCase())}
+                            onKeyUp={handleKeyPress}
+                            disabled={guesses.length > 1}
+                            style={{ display: guesses.length < 1 ? 'none' : null }}
+                            autoFocus={guesses.length === 1}
+                        />
                         <GuessInput
                           id="guess2"
                           key="guess2"
@@ -404,9 +481,9 @@ const PlayV2 = props => {
                           onChange={e => displayTracks(e.target.value.toLowerCase())}
                           onKeyUp={handleKeyPress}
                           disabled={guesses.length > 2}
+                          style={{ display: guesses.length < 2 ? 'none' : null }}
+                          autoFocus={guesses.length === 2}
                         />
-                      ) : null}
-                      {guesses.length > 2 ? (
                         <GuessInput
                           id="guess3"
                           key="guess3"
@@ -415,9 +492,9 @@ const PlayV2 = props => {
                           onChange={e => displayTracks(e.target.value.toLowerCase())}
                           onKeyUp={handleKeyPress}
                           disabled={guesses.length > 3}
+                          style={{ display: guesses.length < 3 ? 'none' : null }}
+                          autoFocus={guesses.length === 3}
                         />
-                      ) : null}
-                      {guesses.length > 3 ? (
                         <GuessInput
                           id="guess4"
                           key="guess4"
@@ -426,8 +503,9 @@ const PlayV2 = props => {
                           onChange={e => displayTracks(e.target.value.toLowerCase())}
                           onKeyUp={handleKeyPress}
                           disabled={guesses.length > 4}
+                          style={{ display: guesses.length < 4 ? 'none' : null }}
+                          autoFocus={guesses.length === 4}
                         />
-                      ) : null}
                     </GuessContainer>
                     <TracksContainer>
                       {displayedTracks
@@ -446,7 +524,33 @@ const PlayV2 = props => {
                         : null}
                     </TracksContainer>
                   </LeftsideContainer>
-                  <RightsideContainer>Artist</RightsideContainer>
+                  <RightsideContainer>
+                        <ArtistCardsContainer style={{ display: 'none' }}>
+                            {currentTrack.artists?.map((item, i) => (
+                                <ArtistCardContainer id={`ArtistCardContainer${i}`} key={`ArtistCardContainer${i}`}>
+                                    <ArtistCardArtwork>
+                                        { item.id === artistId ? (
+                                            <img src={artist.images[0].url} alt="Artist Artwork" />
+                                        ) : artistsGuessed.includes(item.id) ? (
+                                            <img src={getArtistPicture(item.id)} alt="Artist Artwork" />
+                                        ) : (
+                                            <img src={'https://i.pinimg.com/474x/f1/da/a7/f1daa70c9e3343cebd66ac2342d5be3f.jpg'} alt="Artist Artwork" />
+                                        )}
+                                        
+                                    </ArtistCardArtwork>
+                                    <ArtistCardInfo>
+                                        <ArtistCardLabel>
+                                            Artist
+                                        </ArtistCardLabel>
+                                        <ArtistCardName>
+                                            {artistsGuessed.includes(item.id) ? item.name : '???'}
+                                        </ArtistCardName>
+                                    </ArtistCardInfo>
+                                    
+                                </ArtistCardContainer>
+                            ))}
+                        </ArtistCardsContainer>
+                  </RightsideContainer>
                 </ContentContainer>
               </BodyContainer>
             </>

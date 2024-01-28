@@ -1,6 +1,6 @@
 import { Link } from '@reach/router';
 import styled from 'styled-components/macro';
-import { theme, mixins, media, Main } from '../../styles';
+import { theme, media } from '../../styles';
 
 const { colors, fontSizes, fonts, spacing } = theme;
 
@@ -91,6 +91,17 @@ export const Artwork = styled.div`
     ${media.tablet`
             display: none;
         `};
+  }
+`;
+export const ArtworkSmall = styled.div`
+  border-radius: 100%;
+  img {
+    object-fit: cover;
+    border-radius: 100%;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
   }
 `;
 export const AlbumArtwork = styled.div`
@@ -443,3 +454,23 @@ export const TracksContainer = styled.ul`
         width: 300px;
     `}
 `;
+
+export const ArtistCardsContainer = styled.div`
+`;
+
+export const ArtistCardContainer = styled.div`
+`;
+
+export const ArtistCardArtwork = styled.div`
+`;
+
+export const ArtistCardInfo = styled.div`
+`;
+
+export const ArtistCardLabel = styled.div`
+`;
+
+export const ArtistCardName = styled.div`
+`;
+
+  

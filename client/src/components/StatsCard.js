@@ -11,8 +11,7 @@ import {
   StatsCardInside,
   StatSubtext,
 } from './cssStyle/Play.styled';
-import { theme } from '../styles';
-const { colors } = theme;
+
 
 const StatsCard = ({ stat, label, icon, subtext }) => (
   <StatsCardContainer>
@@ -38,8 +37,8 @@ const StatsCard = ({ stat, label, icon, subtext }) => (
 );
 
 StatsCard.propTypes = {
-  stat: PropTypes.object.isRequired,
-  label: PropTypes.object.isRequired,
+  stat: PropTypes.number.isRequired,
+  label: PropTypes.string.isRequired,
   icon: PropTypes.object.isRequired,
   subtext: PropTypes.object.isRequired,
 };

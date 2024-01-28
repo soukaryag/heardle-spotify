@@ -89,6 +89,10 @@ export const formatLargeNumber = n => {
   if (n >= 1e12) return formatWithCommas(+(n / 1e12).toFixed(1)) + 'T';
 };
 
+export const formatForSearch = text => {
+  return text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g, '');
+}
+
 // Higher-order function for async/await error handling
 export const catchErrors = fn =>
   function (...args) {
