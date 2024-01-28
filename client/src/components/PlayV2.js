@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import ConfettiExplosion from 'react-confetti-explosion';
 import { ColorExtractor } from 'react-color-extractor';
-import { formatForSearch, catchErrors } from '../utils';
+import ProgressBar from "@ramonak/react-progress-bar";
+import { formatForSearch, formatPlaybackTime, catchErrors } from '../utils';
 import {
   getAllAlbumsByArtist,
   getAllTracksByAlbum,
@@ -39,6 +40,7 @@ import {
   RightsideContainer,
   ActionsContainer,
   SecondaryButton,
+  SecondaryButtonDisabled,
   PlayButton,
   GuessContainer,
   GuessInput,
@@ -49,11 +51,17 @@ import {
   ArtistCardInfo,
   ArtistCardLabel,
   ArtistCardName,
+  ContolsBarContainer,
+  ContolsBarTop,
+  PlaybackBar,
+  PlaybackTime,
+  PlaybackProgressBarContainer,
 } from './cssStyle/Play.styled';
 const { colors, fontSizes } = theme;
 
 const PlayV2 = props => {
   const { artistId } = props;
+  const timerId = useRef();
 
   const deviceId = props.location.search.split('=')[1] ?? null;
 
@@ -64,6 +72,8 @@ const PlayV2 = props => {
   const [gradientColor, setGradientColor] = useState(colors.black);
 
   const timeLimitsArray = [1500, 2000, 4000, 8000, 16000, 32000];
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [progressBarPercent, setProgressBarPercent] = useState(0);
   const [guesses, setGuesses] = useState([]);
   const [displayedTracks, setDisplayedTracks] = useState(null);
   const [trackIsPlaying, setTrackIsPlaying] = useState(false);
@@ -156,6 +166,7 @@ const PlayV2 = props => {
         toAdd[e.id] = data.images[0].url;
         setCurrentTrackArtistPictures(prevState => ({ ...prevState, ...toAdd }));
       });
+      setTimeLeft(pickedTrack.duration_ms)
       setCurrentTrack(pickedTrack);
     };
 
@@ -183,6 +194,8 @@ const PlayV2 = props => {
     setWinner(false);
     setLoser(false);
     pausePlayback(deviceId);
+    setTimeLeft(null);
+    setProgressBarPercent(0)
     setTrackIsPlaying(false);
     setDisplayedTracks(false);
     setGuesses([]);
@@ -195,6 +208,50 @@ const PlayV2 = props => {
       }
     }
   }, []);
+
+//   useEffect(() => {
+//     // when track is selected, play it
+//     if (playbackTimeStart) {
+//         setPlaybackTimeElapsed(new Date() - playbackTimeStart);
+//     }
+//   }, [playbackTimeStart, playbackTimeElapsed]);
+
+    useEffect(() => {
+        console.log('ONE');
+        if (trackIsPlaying && currentTrack && currentTrack.duration_ms) {
+            timerId.current = window.setInterval(() => {
+                setTimeLeft((prevProgress) => prevProgress - 1000);
+            }, 1000);
+
+            console.log(timerId.current, timeLeft, currentTrack.duration_ms);
+
+            return () => {
+                clearInterval(timerId.current);
+            };
+        } else {
+            console.log('!!!ONE');
+        }
+    }, [trackIsPlaying]);
+
+    useEffect(() => {
+        console.log('TWO');
+        if (trackIsPlaying && currentTrack && currentTrack.duration_ms) {
+            if (progressBarPercent < 100) {
+                let updateProgressPercent = Math.round(
+                    ((currentTrack.duration_ms - (timeLeft - 1000)) / currentTrack.duration_ms) * 100
+                );
+                console.log('p', updateProgressPercent);
+                setProgressBarPercent(updateProgressPercent);
+            }
+
+            if (timeLeft === 0 && timerId.current) {
+                clearInterval(timerId.current);
+                return;
+            }
+        } else {
+            console.log('!!!TWO');
+        }
+    }, [timeLeft]);
 
   const displayTracks = text => {
     if (!text) {
@@ -225,6 +282,8 @@ const PlayV2 = props => {
     setTimeout(function () {
       pausePlayback(deviceId);
       setTrackIsPlaying(false);
+      setTimeLeft(currentTrack.duration_ms)
+      setProgressBarPercent(0)
     }, timeLimit ?? timeLimitsArray[guesses.length]);
   };
 
@@ -275,6 +334,7 @@ const PlayV2 = props => {
       // got it! WINNER
       inputElement.setAttribute('style', 'background-color: #1DB954; border: 2px solid #1DB954');
       inputElement.disabled = true;
+      setTrackIsPlaying(true);
       startPlayback(currentTrack.id, deviceId);
       setDisplayedTracks([currentTrack]);
       setWinner(true);
@@ -429,28 +489,56 @@ const PlayV2 = props => {
               </BannerHeader>
               <BodyContainer>
                 <ActionsContainer>
-                  {(winner || loser) && (
-                    <SecondaryButton to={`/track/${currentTrack.id}`}>
-                      <IconMicrophone />
-                    </SecondaryButton>
-                  )}
+                    <ContolsBarContainer>
+                        <ContolsBarTop>
+                            {(winner || loser) ? (
+                                <SecondaryButton to={`/track/${currentTrack.id}`}>
+                                    <IconMicrophone />
+                                </SecondaryButton>
+                            ) : (
+                                <SecondaryButtonDisabled>
+                                    <IconMicrophone />
+                                </SecondaryButtonDisabled>
+                            )}
+                            <PlayButton onClick={e => playSong()}>
+                                {trackIsPlaying ? (
+                                <IconPause style={{ marginTop: '4px', marginLeft: '3px' }} />
+                                ) : (
+                                <IconPlay />
+                                )}
+                            </PlayButton>
 
-                  <PlayButton onClick={e => playSong()}>
-                    {trackIsPlaying ? (
-                      <IconPause style={{ marginTop: '6px', marginLeft: '5px' }} />
-                    ) : (
-                      <IconPlay />
-                    )}
-                  </PlayButton>
-
-                  {(winner || loser) && (
-                    <SecondaryButton
-                      to={`/play/artist/${artistId}?device_id=${deviceId}`}
-                      onClick={() => window.location.reload()}
-                    >
-                      <IconReset />
-                    </SecondaryButton>
-                  )}
+                            {(winner || loser) ? (
+                                <SecondaryButton
+                                    to={`/play/artist/${artistId}?device_id=${deviceId}`}
+                                    onClick={() => window.location.reload()}
+                                >
+                                    <IconReset />
+                                </SecondaryButton>
+                            ) : (
+                                <SecondaryButtonDisabled>
+                                    <IconReset />
+                                </SecondaryButtonDisabled>
+                            )}
+                        </ContolsBarTop>
+                        <PlaybackBar>
+                            <PlaybackTime>
+                                { timeLeft ? formatPlaybackTime(currentTrack.duration_ms - timeLeft) : '0:00' }
+                            </PlaybackTime>
+                            <PlaybackProgressBarContainer>
+                                <ProgressBar 
+                                    completed={ progressBarPercent ? progressBarPercent : 0 }
+                                    baseBgColor='hsla(0,0%,100%,.3)'
+                                    bgColor='#fff'
+                                    height='4px'
+                                    width='280px'
+                                />
+                            </PlaybackProgressBarContainer>
+                            <PlaybackTime>
+                                { (winner || loser) ? formatPlaybackTime(currentTrack.duration_ms) : '?:??' }
+                            </PlaybackTime>
+                        </PlaybackBar>
+                    </ContolsBarContainer>
                 </ActionsContainer>
                 <ContentContainer>
                   <LeftsideContainer>

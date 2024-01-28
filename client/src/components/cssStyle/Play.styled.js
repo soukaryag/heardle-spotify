@@ -126,9 +126,6 @@ export const ArtistInfoContainer = styled.div`
 export const ArtistName = styled.a`
   display: inline;
   font-weight: 700;
-  &:hover {
-    color: ${colors.green};
-  }
   font-size: 96px;
   ${media.tablet`
         font-size: 80px;
@@ -265,17 +262,17 @@ export const StartButton = styled(Link)`
   }
 `;
 export const StartButtonDisabled = styled.a`
-    display: inline-block;
-    background-color: ${colors.grey};
-    color: ${colors.white};
-    border-radius: 30px;
-    padding: 17px 35px;
-    min-width: 160px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    text-align: center;
-    cursor: not-allowed;
+  display: inline-block;
+  background-color: ${colors.grey};
+  color: ${colors.white};
+  border-radius: 30px;
+  padding: 17px 35px;
+  min-width: 160px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+  cursor: not-allowed;
 `;
 export const InfoButtonContainer = styled.a`
   align-items: center;
@@ -393,9 +390,9 @@ export const PlayButton = styled.a`
   color: ${colors.black};
   border-radius: 100%;
   padding: 10px 10px;
-  margin: 20px 0;
-  width: 70px;
-  height: 70px;
+  margin: 10px 0;
+  width: 50px;
+  height: 50px;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -406,8 +403,8 @@ export const PlayButton = styled.a`
     background-color: ${colors.offGreen};
   }
   svg {
-    width: 50px;
-    height: 50px;
+    width: 30px;
+    height: 30px;
   }
 `;
 export const SecondaryButton = styled(Link)`
@@ -415,9 +412,9 @@ export const SecondaryButton = styled(Link)`
   color: ${colors.white};
   border-radius: 100%;
   padding: 10px 10px;
-  margin: 0 15px;
-  width: 50px;
-  height: 50px;
+  margin: auto 12px;
+  width: 35px;
+  height: 35px;
   font-weight: 500;
   font-size: 8px;
   letter-spacing: 2px;
@@ -428,6 +425,22 @@ export const SecondaryButton = styled(Link)`
   &:focus {
     color: ${colors.green};
   }
+`;
+export const SecondaryButtonDisabled = styled.a`
+  background-color: ${colors.black}00;
+  color: ${colors.lightGrey};
+  border-radius: 100%;
+  padding: 10px 10px;
+  margin: auto 12px;
+  width: 35px;
+  height: 35px;
+  font-weight: 500;
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: flex-end;
+  justify-content: flex-end;
+  cursor: not-allowed;
 `;
 
 export const GuessContainer = styled.div`
@@ -534,4 +547,34 @@ export const ArtistCardName = styled.a`
   ${media.tablet`
         font-size: 14px;
     `}
+`;
+
+export const ContolsBarContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-width: 500px;
+  border-radius: 6px;
+  padding: 5px 10px 10px 12px;
+  ${media.tablet`
+        margin: 0 auto;
+        min-width: 300px;
+    `}
+`;
+export const ContolsBarTop = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+`;
+export const PlaybackBar = styled.div`
+  display: flex;
+  flex-direction: row;
+  margin: 0 auto;
+`;
+export const PlaybackTime = styled.div`
+  color: ${colors.textGrey};
+  font-size: ${fontSizes.sm};
+`;
+export const PlaybackProgressBarContainer = styled.div`
+  display: flex;
+  margin: auto 8px;
 `;
