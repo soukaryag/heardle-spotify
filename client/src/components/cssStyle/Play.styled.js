@@ -456,21 +456,51 @@ export const TracksContainer = styled.ul`
 `;
 
 export const ArtistCardsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
 export const ArtistCardContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    min-width: 350px;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 5px;
+    &:hover {
+        background-color: ${colors.grey}55;
+    }
 `;
 
 export const ArtistCardArtwork = styled.div`
+    border-radius: 100%;
+    margin-right: 10px;
+    img {
+        object-fit: cover;
+        border-radius: 100%;
+        width: 70px;
+        height: 70px;
+        box-shadow: 0 4px 60px rgba(0,0,0,.5);
+    }
 `;
 
 export const ArtistCardInfo = styled.div`
+    margin: auto 0;
+    display: flex;
+    flex-direction: column;
 `;
 
-export const ArtistCardLabel = styled.div`
+export const ArtistCardLabel = styled.a`
+    font-weight: 500;
+    font-size: ${fontSizes.xs};
+    margin-bottom: 5px;
 `;
 
-export const ArtistCardName = styled.div`
+export const ArtistCardName = styled.a`
+    font-weight: 700;
+    curosr: pointer;
+    &:hover {
+        color: ${colors.green};
+    }
+    font-size: 15px;
 `;
-
-  

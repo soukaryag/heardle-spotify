@@ -2,13 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { ColorExtractor } from 'react-color-extractor';
 import { formatWithCommas, catchErrors } from '../utils';
-import {
-  getArtist,
-  getAllDevices,
-  getDatabase,
-  setDatabase,
-  getUserInfo,
-} from '../spotify';
+import { getArtist, getAllDevices, getDatabase, setDatabase, getUserInfo } from '../spotify';
 
 import Loader from './Loader';
 import StatsCard from './StatsCard';
@@ -220,8 +214,7 @@ const Artist = props => {
                           <span
                             style={{ color: colors.red, marginRight: '3px', fontWeight: '600' }}
                           >
-                            {(100 * (statsForArtist.losses / statsForArtist.attempts)).toFixed(2)}
-                            %
+                            {(100 * (statsForArtist.losses / statsForArtist.attempts)).toFixed(2)}%
                           </span>{' '}
                           of games lost
                         </>
@@ -252,7 +245,7 @@ const Artist = props => {
                     <StatsCard
                       stat={
                         statsForArtist.attempts > 0
-                          ? statsForArtist.total_guesses / statsForArtist.attempts
+                          ? statsForArtist.total_guesses / (statsForArtist.wins + statsForArtist.losses)
                           : 0
                       }
                       label={'Average Guess'}

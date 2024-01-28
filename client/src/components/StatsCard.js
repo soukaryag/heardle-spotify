@@ -12,7 +12,6 @@ import {
   StatSubtext,
 } from './cssStyle/Play.styled';
 
-
 const StatsCard = ({ stat, label, icon, subtext }) => (
   <StatsCardContainer>
     <StatsCardInside>

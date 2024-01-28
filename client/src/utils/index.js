@@ -91,7 +91,7 @@ export const formatLargeNumber = n => {
 
 export const formatForSearch = text => {
   return text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()']/g, '');
-}
+};
 
 // Higher-order function for async/await error handling
 export const catchErrors = fn =>

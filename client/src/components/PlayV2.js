@@ -48,7 +48,7 @@ import {
   ArtistCardArtwork,
   ArtistCardInfo,
   ArtistCardLabel,
-  ArtistCardName
+  ArtistCardName,
 } from './cssStyle/Play.styled';
 const { colors, fontSizes } = theme;
 
@@ -102,57 +102,54 @@ const PlayV2 = props => {
     }
   }, [guesses]);
 
-  const fetchAllTracks = async (items) => {
+  const fetchAllTracks = async items => {
     const allTracks = [];
-    
-    for await (const { id, images, name } of items) {
-        if (name.toLowerCase().includes('remix') || name.toLowerCase().includes('live')) {
-            continue;
-        }
-        const { data } = await getAllTracksByAlbum(id);
-        let additionalTracks = data.items ?? [];
-        additionalTracks = additionalTracks.filter(function (el) {
-            return (
-                !el.name.toLowerCase().includes('remix') 
-                    && !el.name.toLowerCase().includes('live')
-            );
-        });
-        additionalTracks = additionalTracks.map(obj => ({
-            ...obj,
-            album: {
-                id,
-                images,
-                name,
-            },
-        }));
 
-        allTracks.push(...additionalTracks);
-    };
+    for await (const { id, images, name } of items) {
+      if (name.toLowerCase().includes('remix') || name.toLowerCase().includes('live')) {
+        continue;
+      }
+      const { data } = await getAllTracksByAlbum(id);
+      let additionalTracks = data.items ?? [];
+      additionalTracks = additionalTracks.filter(function (el) {
+        return !el.name.toLowerCase().includes('remix') && !el.name.toLowerCase().includes('live');
+      });
+      additionalTracks = additionalTracks.map(obj => ({
+        ...obj,
+        album: {
+          id,
+          images,
+          name,
+        },
+      }));
+
+      allTracks.push(...additionalTracks);
+    }
 
     // remove any duplicate song (in the case a track appears as single AND in album)
     return allTracks.reduce((accumulator, current) => {
-        if (!accumulator.find((item) => item.name === current.name)) {
-            accumulator.push(current);
-        }
-        return accumulator;
+      if (!accumulator.find(item => item.name === current.name)) {
+        accumulator.push(current);
+      }
+      return accumulator;
     }, []);
-  }
+  };
 
   useEffect(() => {
     // fetches all relevant tracks minus remixes and live renditions
     const fetchData = async () => {
-        const { data } = await getAllAlbumsByArtist(artistId);
-        const allTracks = await fetchAllTracks(data.items);
-        setTracks(allTracks);
+      const { data } = await getAllAlbumsByArtist(artistId);
+      const allTracks = await fetchAllTracks(data.items);
+      setTracks(allTracks);
 
-        let db = getDatabase();
-        const history = db[artistId].last_5_songs ?? [];
-        let pickedTrack = null;
-        while (!pickedTrack || history.includes(pickedTrack.id)) {
-            pickedTrack = allTracks[Math.floor(Math.random() * allTracks.length)];
-        }
-        console.log(pickedTrack)
-        setCurrentTrack(pickedTrack);
+      let db = getDatabase();
+      const history = db[artistId].last_5_songs ?? [];
+      let pickedTrack = null;
+      while (!pickedTrack || history.includes(pickedTrack.id)) {
+        pickedTrack = allTracks[Math.floor(Math.random() * allTracks.length)];
+      }
+      console.log(pickedTrack);
+      setCurrentTrack(pickedTrack);
     };
 
     catchErrors(fetchData());
@@ -192,10 +189,10 @@ const PlayV2 = props => {
     }
   }, []);
 
-  const getArtistPicture = async (id) => {
+  const getArtistPicture = async id => {
     const { data } = await getArtist(artistId);
-    return data.images[0].url
-  }
+    return data.images[0].url;
+  };
 
   const displayTracks = text => {
     if (!text) {
@@ -263,10 +260,10 @@ const PlayV2 = props => {
     }
 
     track.artists.forEach(item => {
-        if (item.id !== artistId && currentTrack.artists.filter(e => e.id === item.id).length > 0) {
-            setArtistsGuessed(oldGuessed => [...oldGuessed, item.id]);
-        }
-    })
+      if (item.id !== artistId && currentTrack.artists.filter(e => e.id === item.id).length > 0) {
+        setArtistsGuessed(oldGuessed => [...oldGuessed, item.id]);
+      }
+    });
 
     if (
       track.name === currentTrack.name ||
@@ -301,26 +298,26 @@ const PlayV2 = props => {
     }
 
     if (currId < 3) {
-        const nextInputElement = document.getElementById(`guess${currId + 1}`);
-        if (nextInputElement) {
-            nextInputElement.focus();
-        } else {
-            console.log(`guess${currId + 1}`)
-        }
+      const nextInputElement = document.getElementById(`guess${currId + 1}`);
+      if (nextInputElement) {
+        nextInputElement.focus();
+      } else {
+        console.log(`guess${currId + 1}`);
+      }
     }
   };
 
   const handleKeyPress = e => {
     if (winner || loser) {
-        return
+      return;
     }
 
     if (e.key === 'Control') {
-        playSong();
+      playSong();
     } else if (e.key === 'Enter') {
-        if (trackSelectedFromSearch < displayedTracks.length) {
-            checkGuess(displayedTracks[trackSelectedFromSearch]);
-        }
+      if (trackSelectedFromSearch < displayedTracks.length) {
+        checkGuess(displayedTracks[trackSelectedFromSearch]);
+      }
     } else if (e.key === 'ArrowUp') {
       setTrackSelectedFromSearch(e => {
         if (e > 0) {
@@ -409,13 +406,13 @@ const PlayV2 = props => {
                         alignItems: 'center',
                       }}
                     >
-                        {winner && (
-                            <ConfettiExplosion
-                                duration={5000}
-                                particleCount={200}
-                                onComplete={e => console.log('DONE!')}
-                            />
-                        )}
+                      {winner && (
+                        <ConfettiExplosion
+                          duration={5000}
+                          particleCount={200}
+                          onComplete={e => console.log('DONE!')}
+                        />
+                      )}
                       <ArtworkSmall style={{ width: '20px', height: '20px', marginRight: '10px' }}>
                         <img
                           style={{ width: '20px', height: '20px' }}
@@ -452,60 +449,60 @@ const PlayV2 = props => {
                 <ContentContainer>
                   <LeftsideContainer>
                     <GuessContainer>
-                        <GuessInput
-                            id="guess0"
-                            key="guess0"
-                            autoComplete="off"
-                            placeholder="Type your guess..."
-                            onChange={e => displayTracks(e.target.value.toLowerCase())}
-                            onKeyUp={handleKeyPress}
-                            disabled={guesses.length > 0}
-                            autoFocus={guesses.length === 0}
-                        />
-                        <GuessInput
-                            id="guess1"
-                            key="guess1"
-                            autoComplete="off"
-                            placeholder="Type your guess..."
-                            onChange={e => displayTracks(e.target.value.toLowerCase())}
-                            onKeyUp={handleKeyPress}
-                            disabled={guesses.length > 1}
-                            style={{ display: guesses.length < 1 ? 'none' : null }}
-                            autoFocus={guesses.length === 1}
-                        />
-                        <GuessInput
-                          id="guess2"
-                          key="guess2"
-                          autoComplete="off"
-                          placeholder="Type your guess..."
-                          onChange={e => displayTracks(e.target.value.toLowerCase())}
-                          onKeyUp={handleKeyPress}
-                          disabled={guesses.length > 2}
-                          style={{ display: guesses.length < 2 ? 'none' : null }}
-                          autoFocus={guesses.length === 2}
-                        />
-                        <GuessInput
-                          id="guess3"
-                          key="guess3"
-                          autoComplete="off"
-                          placeholder="Type your guess..."
-                          onChange={e => displayTracks(e.target.value.toLowerCase())}
-                          onKeyUp={handleKeyPress}
-                          disabled={guesses.length > 3}
-                          style={{ display: guesses.length < 3 ? 'none' : null }}
-                          autoFocus={guesses.length === 3}
-                        />
-                        <GuessInput
-                          id="guess4"
-                          key="guess4"
-                          autoComplete="off"
-                          placeholder="Type your guess..."
-                          onChange={e => displayTracks(e.target.value.toLowerCase())}
-                          onKeyUp={handleKeyPress}
-                          disabled={guesses.length > 4}
-                          style={{ display: guesses.length < 4 ? 'none' : null }}
-                          autoFocus={guesses.length === 4}
-                        />
+                      <GuessInput
+                        id="guess0"
+                        key="guess0"
+                        autoComplete="off"
+                        placeholder="Type your guess..."
+                        onChange={e => displayTracks(e.target.value.toLowerCase())}
+                        onKeyUp={handleKeyPress}
+                        disabled={guesses.length > 0}
+                        autoFocus={guesses.length === 0}
+                      />
+                      <GuessInput
+                        id="guess1"
+                        key="guess1"
+                        autoComplete="off"
+                        placeholder="Type your guess..."
+                        onChange={e => displayTracks(e.target.value.toLowerCase())}
+                        onKeyUp={handleKeyPress}
+                        disabled={guesses.length > 1}
+                        style={{ display: guesses.length < 1 ? 'none' : null }}
+                        autoFocus={guesses.length === 1}
+                      />
+                      <GuessInput
+                        id="guess2"
+                        key="guess2"
+                        autoComplete="off"
+                        placeholder="Type your guess..."
+                        onChange={e => displayTracks(e.target.value.toLowerCase())}
+                        onKeyUp={handleKeyPress}
+                        disabled={guesses.length > 2}
+                        style={{ display: guesses.length < 2 ? 'none' : null }}
+                        autoFocus={guesses.length === 2}
+                      />
+                      <GuessInput
+                        id="guess3"
+                        key="guess3"
+                        autoComplete="off"
+                        placeholder="Type your guess..."
+                        onChange={e => displayTracks(e.target.value.toLowerCase())}
+                        onKeyUp={handleKeyPress}
+                        disabled={guesses.length > 3}
+                        style={{ display: guesses.length < 3 ? 'none' : null }}
+                        autoFocus={guesses.length === 3}
+                      />
+                      <GuessInput
+                        id="guess4"
+                        key="guess4"
+                        autoComplete="off"
+                        placeholder="Type your guess..."
+                        onChange={e => displayTracks(e.target.value.toLowerCase())}
+                        onKeyUp={handleKeyPress}
+                        disabled={guesses.length > 4}
+                        style={{ display: guesses.length < 4 ? 'none' : null }}
+                        autoFocus={guesses.length === 4}
+                      />
                     </GuessContainer>
                     <TracksContainer>
                       {displayedTracks
@@ -524,32 +521,50 @@ const PlayV2 = props => {
                         : null}
                     </TracksContainer>
                   </LeftsideContainer>
-                  <RightsideContainer>
-                        <ArtistCardsContainer style={{ display: 'none' }}>
-                            {currentTrack.artists?.map((item, i) => (
-                                <ArtistCardContainer id={`ArtistCardContainer${i}`} key={`ArtistCardContainer${i}`}>
+                  <RightsideContainer style={{ margin: 0, paddingTop: 0 }}>
+                    <ArtistCardsContainer>
+                        <ArtistCardContainer
+                          id={`ArtistCardContainer${-1}`}
+                          key={`ArtistCardContainer${-1}`}
+                        >
+                          <ArtistCardArtwork>
+                            <img src={artist.images[0].url} alt="Artist Artwork" />
+                          </ArtistCardArtwork>
+                          <ArtistCardInfo>
+                            <ArtistCardLabel>Artist</ArtistCardLabel>
+                            <ArtistCardName>
+                              {artist.name}
+                            </ArtistCardName>
+                          </ArtistCardInfo>
+                        </ArtistCardContainer>
+                        {currentTrack.artists?.map((item, i) => (
+                            item.id === artistId ? null : (
+                                <ArtistCardContainer
+                                    id={`ArtistCardContainer${i}`}
+                                    key={`ArtistCardContainer${i}`}
+                                >
                                     <ArtistCardArtwork>
-                                        { item.id === artistId ? (
-                                            <img src={artist.images[0].url} alt="Artist Artwork" />
-                                        ) : artistsGuessed.includes(item.id) ? (
+                                        { artistsGuessed.includes(item.id) ? (
                                             <img src={getArtistPicture(item.id)} alt="Artist Artwork" />
                                         ) : (
-                                            <img src={'https://i.pinimg.com/474x/f1/da/a7/f1daa70c9e3343cebd66ac2342d5be3f.jpg'} alt="Artist Artwork" />
+                                            <img
+                                                src={
+                                                'https://i.pinimg.com/474x/f1/da/a7/f1daa70c9e3343cebd66ac2342d5be3f.jpg'
+                                                }
+                                                alt="Artist Artwork"
+                                            />
                                         )}
-                                        
                                     </ArtistCardArtwork>
                                     <ArtistCardInfo>
-                                        <ArtistCardLabel>
-                                            Artist
-                                        </ArtistCardLabel>
+                                        <ArtistCardLabel>Artist</ArtistCardLabel>
                                         <ArtistCardName>
                                             {artistsGuessed.includes(item.id) ? item.name : '???'}
                                         </ArtistCardName>
                                     </ArtistCardInfo>
-                                    
                                 </ArtistCardContainer>
-                            ))}
-                        </ArtistCardsContainer>
+                            )
+                        ))}
+                    </ArtistCardsContainer>
                   </RightsideContainer>
                 </ContentContainer>
               </BodyContainer>
