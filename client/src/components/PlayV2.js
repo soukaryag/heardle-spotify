@@ -262,9 +262,9 @@ const PlayV2 = props => {
   const playSong = timeLimit => {
     if (!currentTrack) return;
     if (winner || loser) {
-        setTrackIsPlaying(true);
-        startPlayback(currentTrack.id, deviceId, currentTrack.duration_ms - timeLeft);
-        return;
+      setTrackIsPlaying(true);
+      startPlayback(currentTrack.id, deviceId, currentTrack.duration_ms - timeLeft);
+      return;
     }
 
     setTrackIsPlaying(true);
@@ -304,6 +304,7 @@ const PlayV2 = props => {
     }
 
     setDisplayedTracks([]);
+    setTrackSelectedFromSearch(0);
 
     // update guessed ui elements
     if (track.album.name === currentTrack.album.name) {
@@ -389,27 +390,31 @@ const PlayV2 = props => {
     }
   };
 
-    const handleUserKeyPress = useCallback((event, gameOver, currTrack, device) => {
-        const { key } = event;
-        if (gameOver) {
-            console.log(key);
-            if (key === 'r') {
-                window.location.reload();
-            } else if (key === 'i') {
-                window.open(`https://spotify-profile.herokuapp.com/track/${currTrack.id}`)
-            } else if (key === ' ' || key === 'Enter') {
-                pausePlayback(device);
-                setTrackIsPlaying(false);
-            } 
-        }
-    }, []);
+  const handleUserKeyPress = useCallback((event, gameOver, currTrack, device) => {
+    const { key } = event;
+    if (gameOver) {
+      console.log(key);
+      if (key === 'r') {
+        window.location.reload();
+      } else if (key === 'i') {
+        window.open(`https://spotify-profile.herokuapp.com/track/${currTrack.id}`);
+      } else if (key === ' ' || key === 'Enter') {
+        pausePlayback(device);
+        setTrackIsPlaying(false);
+      }
+    }
+  }, []);
 
-    useEffect(() => {
-        window.addEventListener("keydown", (e) => handleUserKeyPress(e, winner || loser, currentTrack, deviceId));
-        return () => {
-            window.removeEventListener("keydown", (e) => handleUserKeyPress(e, winner || loser, currentTrack, deviceId));
-        };
-    }, [handleUserKeyPress, winner, loser, currentTrack, deviceId]);
+  useEffect(() => {
+    window.addEventListener('keydown', e =>
+      handleUserKeyPress(e, winner || loser, currentTrack, deviceId),
+    );
+    return () => {
+      window.removeEventListener('keydown', e =>
+        handleUserKeyPress(e, winner || loser, currentTrack, deviceId),
+      );
+    };
+  }, [handleUserKeyPress, winner, loser, currentTrack, deviceId]);
 
   return (
     <React.Fragment>
@@ -466,7 +471,7 @@ const PlayV2 = props => {
                       </div>
                     </VerifiedArtistContainer>
                     <ArtistName
-                      href={artist.external_urls.spotify}
+                      href={albumGuessed ? `https://open.spotify.com/album/${currentTrack.album.id}` : null}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -513,11 +518,7 @@ const PlayV2 = props => {
                         </SecondaryButtonDisabled>
                       )}
                       <PlayButton onClick={e => playSong()}>
-                        {trackIsPlaying ? (
-                          <IconPause />
-                        ) : (
-                          <IconPlay />
-                        )}
+                        {trackIsPlaying ? <IconPause /> : <IconPlay />}
                       </PlayButton>
 
                       {winner || loser ? (

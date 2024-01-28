@@ -178,7 +178,11 @@ const Artist = props => {
             <ActionsContainer style={{ paddingTop: '16px' }}>
               {deviceId && artist ? (
                 <ButtonsContainer>
-                  <StartButton style={{ marginRight: '10px' }} to={`/artist/${artistId}`} onClick={e => alert('Feature Coming Soon!\nTry Song Streak in the meantime')}>
+                  <StartButton
+                    style={{ marginRight: '10px' }}
+                    to={`/artist/${artistId}`}
+                    onClick={e => alert('Feature Coming Soon!\nTry Song Streak in the meantime')}
+                  >
                     Daily Heardle
                   </StartButton>
                   <StartButtonSecondary to={`/play/artist/${artistId}?device_id=${deviceId}`}>
@@ -187,7 +191,9 @@ const Artist = props => {
                 </ButtonsContainer>
               ) : (
                 <div>
-                  <StartButtonDisabled style={{ marginRight: '10px' }}>Daily Heardle</StartButtonDisabled>
+                  <StartButtonDisabled style={{ marginRight: '10px' }}>
+                    Daily Heardle
+                  </StartButtonDisabled>
                   <StartButtonDisabled>Song Streak</StartButtonDisabled>
                   <p
                     style={{
@@ -223,7 +229,10 @@ const Artist = props => {
                           <span
                             style={{ color: colors.green, marginRight: '3px', fontWeight: '600' }}
                           >
-                            { statsForArtist.attempts ? (100 * (statsForArtist.wins / statsForArtist.attempts)).toFixed(2) : 0}%
+                            {statsForArtist.attempts
+                              ? (100 * (statsForArtist.wins / statsForArtist.attempts)).toFixed(2)
+                              : 0}
+                            %
                           </span>{' '}
                           of games won
                         </>
@@ -238,7 +247,10 @@ const Artist = props => {
                           <span
                             style={{ color: colors.red, marginRight: '3px', fontWeight: '600' }}
                           >
-                            { statsForArtist.attempts ? (100 * (statsForArtist.losses / statsForArtist.attempts)).toFixed(2) : 0}%
+                            {statsForArtist.attempts
+                              ? (100 * (statsForArtist.losses / statsForArtist.attempts)).toFixed(2)
+                              : 0}
+                            %
                           </span>{' '}
                           of games lost
                         </>
@@ -255,11 +267,13 @@ const Artist = props => {
                           <span
                             style={{ color: colors.green, marginRight: '3px', fontWeight: '600' }}
                           >
-                            { statsForArtist.attempts ?(
-                              100 *
-                              ((statsForArtist.wins + statsForArtist.losses) /
-                                statsForArtist.attempts)
-                            ).toFixed(2) : 0}
+                            {statsForArtist.attempts
+                              ? (
+                                  100 *
+                                  ((statsForArtist.wins + statsForArtist.losses) /
+                                    statsForArtist.attempts)
+                                ).toFixed(2)
+                              : 0}
                             %
                           </span>{' '}
                           of games finsihed

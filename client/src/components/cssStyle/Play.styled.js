@@ -86,7 +86,7 @@ export const Artwork = styled.div`
     object-fit: cover;
     border-radius: 100%;
     width: 220px;
-    height: 220px;
+    height: auto;
     box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
     ${media.tablet`
             display: none;
@@ -99,7 +99,7 @@ export const ArtworkSmall = styled.div`
     object-fit: cover;
     border-radius: 100%;
     width: 20px;
-    height: 20px;
+    height: auto;
     margin-right: 10px;
     box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
   }
@@ -128,7 +128,7 @@ export const ArtistName = styled.a`
   font-weight: 700;
   font-size: 96px;
   ${media.tablet`
-        font-size: 80px;
+        font-size: 50px;
     `};
 `;
 export const ArtistNameLink = styled(Link)`
@@ -538,7 +538,7 @@ export const ArtistCardArtwork = styled.div`
     object-fit: cover;
     border-radius: 100%;
     width: 70px;
-    height: 70px;
+    height: auto;
     box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
     ${media.tablet`
         width: 30px;
