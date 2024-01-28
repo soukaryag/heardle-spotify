@@ -1,5 +1,5 @@
 {
-  "name": "spotify-profile",
+  "name": "spotify-heardle",
   "version": "0.1.0",
   "description": "Spotify Heardle",
   "main": "server/index.js",

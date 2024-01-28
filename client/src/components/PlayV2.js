@@ -471,7 +471,11 @@ const PlayV2 = props => {
                       </div>
                     </VerifiedArtistContainer>
                     <ArtistName
-                      href={albumGuessed ? `https://open.spotify.com/album/${currentTrack.album.id}` : null}
+                      href={
+                        albumGuessed
+                          ? `https://open.spotify.com/album/${currentTrack.album.id}`
+                          : null
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
                     >
