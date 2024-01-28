@@ -48,7 +48,7 @@
     "@upstatement/eslint-config": "^3.0.0",
     "@upstatement/prettier-config": "^1.1.0",
     "concurrently": "^5.1.0",
-    "eslint-config-prettier": "^6.3.0",
+    "eslint-config-prettier": "^9.x.x",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-react": "^7.14.3",
     "husky": "^4.2.3",
