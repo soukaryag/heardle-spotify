@@ -173,6 +173,18 @@ export class Database {
         this.saveDatabase();
     }
 
+    getStreakModeGamesPlayed(artist_id) {
+        if (!this.artistExists(artist_id)) return 0
+        
+        return this.getArtistById(artist_id)[this.STREAK_MODE][this.GAMES_PLAYED];
+    }
+
+    getStreakModeLongestStreak(artist_id) {
+        if (!this.artistExists(artist_id)) return 0
+        
+        return this.getArtistById(artist_id)[this.STREAK_MODE][this.MAX_STREAK];
+    }
+
     // PRIVATE METHODS
     isYesterday(date) {
         if (!(date instanceof Date)) 

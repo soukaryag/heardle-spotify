@@ -573,6 +573,53 @@ const PlayStreak = props => {
                           </PlaybackTime>
                         </PlaybackBar>
                       </ContolsBarContainer>
+                      <div style={{ minWidth: '350px', textAlign: 'center', alignItems: 'flex-end', display: 'flex', flexDirection: 'row', margin: '0 auto' }}>
+                        <div style={{ textAlign: 'center', marginRight: '50px' }}>
+                          <div style={{ fontSize: '55px', fontWeight: 600, color: colors.green }}>
+                            {streak}
+                            {winner && (
+                              <ConfettiExplosion
+                                duration={5000}
+                                particleCount={200}
+                                onComplete={e => console.log('DONE!')}
+                              />
+                            )}
+                          </div>
+                          <StreakLabel>
+                            Current<br />Streak
+                          </StreakLabel>
+                        </div>
+                        <div style={{ textAlign: 'center', marginRight: '50px' }}>
+                          <div style={{ fontSize: '35px', fontWeight: 600, color: colors.green }}>
+                            {dbObj.getStreakModeLongestStreak(artistId) ?? 0}
+                            {winner && (
+                              <ConfettiExplosion
+                                duration={5000}
+                                particleCount={200}
+                                onComplete={e => console.log('DONE!')}
+                              />
+                            )}
+                          </div>
+                          <StreakLabel>
+                            Max<br />Streak
+                          </StreakLabel>
+                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                          <div style={{ fontSize: '35px', fontWeight: 600, color: colors.green }}>
+                          {dbObj.getStreakModeGamesPlayed(artistId) ?? 0}
+                            {winner && (
+                              <ConfettiExplosion
+                                duration={5000}
+                                particleCount={200}
+                                onComplete={e => console.log('DONE!')}
+                              />
+                            )}
+                          </div>
+                          <StreakLabel>
+                            Games<br />Played
+                          </StreakLabel>
+                        </div>
+                      </div>
                     </ActionsContainer>
                     <ContentContainer>
                       <LeftsideContainer>
@@ -650,19 +697,6 @@ const PlayStreak = props => {
                         </TracksContainer>
                       </LeftsideContainer>
                       <RightsideContainer style={{ margin: 0, paddingTop: 0 }}>
-                        <div style={{ fontSize: '96px', fontWeight: 600, color: colors.green }}>
-                          {streak}
-                          {winner && (
-                            <ConfettiExplosion
-                              duration={5000}
-                              particleCount={200}
-                              onComplete={e => console.log('DONE!')}
-                            />
-                          )}
-                        </div>
-                        <StreakLabel>
-                          Streak
-                        </StreakLabel>
                         <ArtistCardsContainer>
                           <ArtistCardContainer
                             id={`ArtistCardContainer${-1}`}

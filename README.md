@@ -6,10 +6,18 @@
 ## Setup
 
 1. [Register a Spotify App](https://developer.spotify.com/dashboard/applications) and add `http://localhost:8888/callback` as a Redirect URI in the app settings
-1. Create an `.env` file in the root of the project based on `.env.example`
-1. `nvm use`
-1. `yarn && yarn client:install`
-1. `yarn dev`
+2. Create an `.env` file in the root of the project based on `.env.example`
+3. `nvm use`
+4. `yarn && yarn client:install`
+5. `yarn dev`
+
+
+## TO-DO
+
+1. Implement daily heardle mode
+2. Rework home page
+3. Add a global stats page
+4. Rework db json (consider moving it to postgres)
 
 
 ## Credits

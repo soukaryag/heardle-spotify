@@ -217,6 +217,7 @@ export const BodyContainer = styled.div`
 export const ContentContainer = styled.div`
   display: flex;
   flex-direction: row;
+  margin-top: 20px;
   ${media.tablet`
         display: flex;
         flex-direction: column-reverse;
@@ -239,7 +240,7 @@ export const ActionsContainer = styled.div`
   align-items: center;
   padding: 0px 16px 5px 16px;
   ${media.tablet`
-        justify-content: space-between;
+        flex-direction: column;
     `};
 `;
 export const ButtonsContainer = styled.div`
@@ -384,11 +385,10 @@ export const StatLabel = styled.a`
 `;
 export const StreakLabel = styled.a`
   color: ${colors.lightGrey};
-  font-size: ${fontSizes.sm};
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 600;
-  margin-bottom: ${spacing.md};
 `;
 export const StatSubtext = styled.a`
   color: ${colors.lightGrey};
@@ -522,6 +522,7 @@ export const TracksContainer = styled.ul`
 export const ArtistCardsContainer = styled.div`
   display: flex;
   flex-direction: column;
+  margin-top: 8px;
   ${media.tablet`
     display: none;
     `}
