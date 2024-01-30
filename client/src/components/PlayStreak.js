@@ -61,10 +61,17 @@ const { colors, fontSizes } = theme;
 
 const PlayStreak = props => {
   const { artistId } = props;
+  const [width, setWidth] = useState(window.innerWidth);
+  const isMobile = width <= 768;
+
   const timerId = useRef();
   const scrollRef = useRef(null)
 
-  const executeScroll = () => scrollRef.current.scrollIntoView();
+  const executeScroll = () => {
+    if (isMobile) {
+      scrollRef.current.scrollIntoView()
+    }
+  };
 
   const deviceId = props.location.search.split('=')[1] ?? null;
 
@@ -92,6 +99,8 @@ const PlayStreak = props => {
 
   const [dbObj, setDbObj] = useState(null);
   const [user, setUser] = useState(null);
+
+  
 
   useEffect(() => {
     // fetches user data - can be stored in state from the start (rework)
@@ -529,7 +538,7 @@ const PlayStreak = props => {
                   </ActionsContainer>
                 ) : (
                   <div>
-                    <ActionsContainer ref={scrollRef}>
+                    <ActionsContainer>
                       <ContolsBarContainer>
                         <ContolsBarTop>
                           {winner || loser ? (
@@ -630,7 +639,7 @@ const PlayStreak = props => {
                       
                     </ActionsContainer>
                     <ContentContainer>
-                      <LeftsideContainer>
+                      <LeftsideContainer ref={scrollRef}>
                         <GuessContainer>
                           <GuessInput
                             id="guess0"
