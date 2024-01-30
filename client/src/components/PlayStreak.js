@@ -265,20 +265,20 @@ const PlayStreak = props => {
 
   const playSong = timeLimit => {
     if (!currentTrack) return;
-    // if (winner || loser) {
-    //   setTrackIsPlaying(true);
-    //   startPlayback(currentTrack.id, deviceId, currentTrack.duration_ms - timeLeft);
-    //   return;
-    // }
+    if (winner || loser) {
+      setTrackIsPlaying(true);
+      startPlayback(currentTrack.id, deviceId, currentTrack.duration_ms - timeLeft);
+      return;
+    }
 
-    // setTrackIsPlaying(true);
-    // startPlayback(currentTrack.id, deviceId);
-    // setTimeout(function () {
-    //   pausePlayback(deviceId);
-    //   setTrackIsPlaying(false);
-    //   setTimeLeft(currentTrack.duration_ms);
-    //   setProgressBarPercent(0);
-    // }, timeLimit ?? timeLimitsArray[guesses.length]);
+    setTrackIsPlaying(true);
+    startPlayback(currentTrack.id, deviceId);
+    setTimeout(function () {
+      pausePlayback(deviceId);
+      setTrackIsPlaying(false);
+      setTimeLeft(currentTrack.duration_ms);
+      setProgressBarPercent(0);
+    }, timeLimit ?? timeLimitsArray[guesses.length]);
   };
 
   const hardResetGame = () => {

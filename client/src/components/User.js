@@ -237,7 +237,6 @@ const User = () => {
     const fetchData = async () => {
       const { user } = await getUserInfo();
       setUser(user);
-      console.log(user);
       document.title = `Heardle`;
     };
     catchErrors(fetchData());
