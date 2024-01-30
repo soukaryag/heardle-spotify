@@ -237,6 +237,7 @@ const User = () => {
     const fetchData = async () => {
       const { user } = await getUserInfo();
       setUser(user);
+      console.log(user);
       document.title = `Heardle`;
     };
     catchErrors(fetchData());
@@ -297,7 +298,7 @@ const User = () => {
             <UserName href={user.external_urls.spotify} target="_blank" rel="noopener noreferrer">
               <Name>{user.display_name}</Name>
             </UserName>
-            <Stats>
+            {/* <Stats>
               <Stat>
                 <Number>0</Number>
                 <NumLabel>Attempts</NumLabel>
@@ -310,7 +311,7 @@ const User = () => {
                 <Number>0.0%</Number>
                 <NumLabel>Percentage</NumLabel>
               </Stat>
-            </Stats>
+            </Stats> */}
             <LogoutButton onClick={logout}>Logout</LogoutButton>
           </Header>
 

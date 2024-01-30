@@ -14,21 +14,27 @@
 
 ## TO-DO
 
+- [ ] Add modals with instructions!!!! (3pt)
 - [ ] Implement daily heardle mode
-    - [ ] Hash generation
-    - [ ] One a day logic implementation - block play if today complete
-    - [ ] Save game state idea if leaving page halfway through the game (save on every guess)
-    - [ ] Stat and progress tracking for daily heardle
+    - [ ] Hash generation (2pt)
+    - [ ] One a day logic implementation - block play if today complete (1pt)
+    - [ ] Save game state idea if leaving page halfway through the game (save on every guess) (2pt)
+    - [ ] Stat and progress tracking for daily heardle  (3pt)
+    - [ ] Win/loss state similar to wordle but prettier :O (2pt)
 - [ ] Rework streak heardle mode
-    - [ ] More satisfying ultimate win page
-    - [ ] Share to socials button on end game state
-- [ ] Rework home page
-- [ ] Add a global stats page
-- [ ] Rework db json
-    - [x] Create db class
-    - [ ] Consider moving it to postgres/mongodb
-- [ ] Optimize for mobile play
-    - [ ] Particularly with keyboard/search interaction pushing the page around
+    - [ ] More satisfying ultimate win page (2pt)
+    - [ ] Share to socials button on end game state (2pt)
+- [ ] Rework home page (3pt)
+- [ ] Add a global stats page (4pt)
+- [ ] Rework db
+    - [x] Create db class (3pt)
+    - [ ] Consider moving it to postgres/mongodb (5pt)
+        - [ ] This will allow for leaderboards and all - look into that (Kruti) (5pt)
+- [x] Optimize for mobile play
+    - [x] Particularly with keyboard/search interaction pushing the page around (1pt)
+    - [ ] Remove Nav bar from play pages
+- [ ] General enhancements
+    - [ ] Fix the back and fwd buttons, right now they just does history(-1), but that's wrong (1pt)
 
 
 ## Credits

@@ -455,12 +455,12 @@ const PlayStreak = props => {
                 <NavigationContainer>
                   <NavButtonContainer>
                     <ButtonContainer
-                      onClick={e => window.history.go(-1)}
+                      onClick={e => window.location.href = `/artist/${artistId}`}
                       style={{ marginRight: '10px' }}
                     >
                       <IconBack />
                     </ButtonContainer>
-                    <ButtonContainer style={{ cursor: 'not-allowed', opacity: 0.6 }}>
+                    <ButtonContainer onClick={e => window.history.forward()} style={{ cursor: window.history.next ? null : 'not-allowed', opacity: window.history.next ? null :  0.6 }}>
                       <IconForward />
                     </ButtonContainer>
                   </NavButtonContainer>

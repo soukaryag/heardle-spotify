@@ -126,7 +126,7 @@ const Artist = props => {
             <NavigationContainer>
               <NavButtonContainer>
                 <ButtonContainer
-                  onClick={e => window.history.go(-1)}
+                  onClick={e => window.location.href = `/`}
                   style={{ marginRight: '10px' }}
                 >
                   <IconBack />
