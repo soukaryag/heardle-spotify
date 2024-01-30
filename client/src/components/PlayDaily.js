@@ -14,6 +14,7 @@ import {
   setDatabase,
   getUserInfo,
 } from '../spotify';
+import { Database } from '../database';
 
 import Loader from './Loader';
 import TrackItem from './TrackItem';
@@ -59,7 +60,7 @@ import {
 } from './cssStyle/Play.styled';
 const { colors, fontSizes } = theme;
 
-const PlayV2 = props => {
+const PlayDaily = props => {
   const { artistId } = props;
   const timerId = useRef();
 
@@ -68,6 +69,8 @@ const PlayV2 = props => {
   const [artist, setArtist] = useState(null);
   const [tracks, setTracks] = useState([]);
   const [currentTrack, setCurrentTrack] = useState(null);
+  const [allTracksPlayed, setAllTracksPlayed] = useState([]);
+  const [streak, setStreak] = useState(0);
   const [currentTrackArtistPictures, setCurrentTrackArtistPictures] = useState({});
   const [gradientColor, setGradientColor] = useState(colors.black);
 
@@ -84,6 +87,7 @@ const PlayV2 = props => {
   const [artistsGuessed, setArtistsGuessed] = useState([]);
   const [trackSelectedFromSearch, setTrackSelectedFromSearch] = useState(0);
 
+  const [dbObj, setDbObj] = useState(null);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -96,20 +100,32 @@ const PlayV2 = props => {
   }, []);
 
   useEffect(() => {
+    if (dbObj) return
+    if (!user || !user.id) return
+
+    let databaseObj = new Database(user.id);
+    setDbObj(databaseObj);
+  }, [user]);
+
+
+  useEffect(() => {
     // Checks if guesses >= LIMIT when guesses array updates and sets loss state apporiately
     if (guesses.length >= 5 && !winner) {
       console.log('You lost!');
       setDisplayedTracks([currentTrack]);
       setLoser(true);
 
-      let db = getDatabase();
-      db[artistId].losses = db[artistId].losses + 1;
-      db[artistId].total_guesses = db[artistId].total_guesses + guesses.length;
-      db[artistId].last_5_songs.push(currentTrack);
-      if (db[artistId].last_5_songs.length > 5) {
-        db[artistId].last_5_songs.pop();
+      if (dbObj) {
+        dbObj.updateStreakMode(artistId, 1);
       }
-      setDatabase(db);
+    //   let db = getDatabase();
+    //   db[artistId].losses = db[artistId].losses + 1;
+    //   db[artistId].total_guesses = db[artistId].total_guesses + guesses.length;
+    //   db[artistId].last_5_songs.push(currentTrack);
+    //   if (db[artistId].last_5_songs.length > 5) {
+    //     db[artistId].last_5_songs.pop();
+    //   }
+    //   setDatabase(db);
     }
   }, [guesses]);
 
@@ -153,10 +169,8 @@ const PlayV2 = props => {
       const allTracks = await fetchAllTracks(data.items);
       setTracks(allTracks);
 
-      let db = getDatabase();
-      const history = db[artistId].last_5_songs ?? [];
       let pickedTrack = null;
-      while (!pickedTrack || history.includes(pickedTrack.id)) {
+      while (!pickedTrack || allTracksPlayed.includes(pickedTrack.id)) {
         pickedTrack = allTracks[Math.floor(Math.random() * allTracks.length)];
       }
 
@@ -282,25 +296,9 @@ const PlayV2 = props => {
     const inputElement = document.getElementById(`guess${currId}`);
     inputElement.value = track.name;
 
-    if (currId === 0) {
-      let db = getDatabase();
-      if (!db || db === 'undefined') {
-        db = {};
-      }
-
-      if (db.hasOwnProperty(artistId)) {
-        db[artistId].attempts = db[artistId].attempts + 1;
-      } else {
-        db[artistId] = {
-          attempts: 1,
-          wins: 0,
-          losses: 0,
-          total_guesses: 0,
-          id: artistId,
-          last_5_songs: [],
-        };
-      }
-      setDatabase(db);
+    if (currId === 0 && dbObj) {
+      // once a single guess is made, init the artist in the db
+      dbObj.createArtist(artistId);
     }
 
     setDisplayedTracks([]);
@@ -330,14 +328,9 @@ const PlayV2 = props => {
       setDisplayedTracks([currentTrack]);
       setWinner(true);
 
-      let db = getDatabase();
-      db[artistId].wins = db[artistId].wins + 1;
-      db[artistId].total_guesses = db[artistId].total_guesses + currId + 1;
-      db[artistId].last_5_songs.push(currentTrack.id);
-      if (db[artistId].last_5_songs.length > 5) {
-        db[artistId].last_5_songs.shift();
+      if (dbObj) {
+        dbObj.updateStreakMode(artistId, 1);
       }
-      setDatabase(db);
     } else if (track.album?.name === currentTrack.album.name) {
       // same album
       inputElement.setAttribute('style', 'background-color: #f6cd61; border: 2px solid #f6cd61');
@@ -525,18 +518,6 @@ const PlayV2 = props => {
                         {trackIsPlaying ? <IconPause /> : <IconPlay />}
                       </PlayButton>
 
-                      {winner || loser ? (
-                        <SecondaryButton
-                          to={`/play/artist/${artistId}?device_id=${deviceId}`}
-                          onClick={() => window.location.reload()}
-                        >
-                          <IconReset />
-                        </SecondaryButton>
-                      ) : (
-                        <SecondaryButtonDisabled>
-                          <IconReset />
-                        </SecondaryButtonDisabled>
-                      )}
                     </ContolsBarTop>
                     <PlaybackBar>
                       <PlaybackTime>
@@ -697,8 +678,8 @@ const PlayV2 = props => {
   );
 };
 
-PlayV2.propTypes = {
+PlayDaily.propTypes = {
   artistId: PropTypes.string,
 };
 
-export default PlayV2;
+export default PlayDaily;

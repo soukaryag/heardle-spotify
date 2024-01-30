@@ -237,6 +237,7 @@ const User = () => {
     const fetchData = async () => {
       const { user } = await getUserInfo();
       setUser(user);
+      document.title = `Heardle`;
     };
     catchErrors(fetchData());
   }, []);
@@ -330,7 +331,7 @@ const User = () => {
                 {artistsSearched.items.map(({ id, external_urls, images, name }, i) =>
                   id && external_urls && images && images.length > 0 && name ? (
                     <Artist key={i}>
-                      <ArtistArtwork to={`/play/artist/${id}`}>
+                      <ArtistArtwork to={`/artist/${id}`}>
                         {images.length > 1 ? (
                           <img src={images[1].url} alt="Artist" />
                         ) : images.length > 0 ? (

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { ColorExtractor } from 'react-color-extractor';
 import { formatWithCommas, catchErrors } from '../utils';
-import { getArtist, getAllDevices, getDatabase, setDatabase, getUserInfo } from '../spotify';
+import { getArtist, getAllDevices, getUserInfo } from '../spotify';
+import { Database } from '../database';
 
 import Loader from './Loader';
 import StatsCard from './StatsCard';
@@ -62,9 +63,10 @@ const Artist = props => {
   const [artist, setArtist] = useState(null);
   const [deviceId, setDeviceId] = useState(null);
   const [devicesAvailable, setDevicesAvailable] = useState([]);
-  const [statsForArtist, setStatsForArtist] = useState({});
+  const [statsForArtist, setStatsForArtist] = useState(null);
   const [gradientColor, setGradientColor] = useState(colors.green);
 
+  const [dbObj, setDbObj] = useState(null);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -96,23 +98,13 @@ const Artist = props => {
   }, []);
 
   useEffect(() => {
-    let db = getDatabase();
-    if (!db || db === 'undefined' || !db.hasOwnProperty(artistId)) {
-      db = {};
-      db[artistId] = {
-        attempts: 0,
-        wins: 0,
-        losses: 0,
-        total_guesses: 0,
-        id: artistId,
-        last_5_songs: [],
-      };
-      setStatsForArtist(db[artistId]);
-      setDatabase(db);
-    } else {
-      setStatsForArtist(db[artistId]);
-    }
-  }, []);
+    if (dbObj) return
+    if (!user || !user.id) return
+
+    let databaseObj = new Database(user.id);
+    setDbObj(databaseObj);
+    setStatsForArtist(databaseObj.getArtistById(artistId));
+  }, [user]);
 
   return (
     <React.Fragment>
@@ -180,12 +172,13 @@ const Artist = props => {
                 <ButtonsContainer>
                   <StartButton
                     style={{ marginRight: '10px' }}
-                    to={`/artist/${artistId}`}
-                    onClick={e => alert('Feature Coming Soon!\nTry Song Streak in the meantime')}
+                    to={`/daily/artist/${artistId}?device_id=${deviceId}`}
                   >
                     Daily Heardle
                   </StartButton>
-                  <StartButtonSecondary to={`/play/artist/${artistId}?device_id=${deviceId}`}>
+                  <StartButtonSecondary 
+                    to={`/streak/artist/${artistId}?device_id=${deviceId}`}
+                  >
                     Song Streak
                   </StartButtonSecondary>
                 </ButtonsContainer>
@@ -218,90 +211,87 @@ const Artist = props => {
             </ActionsContainer>
             <ContentContainer>
               <LeftsideContainer>
-                <StatsParentContainer>
-                  <StatsContainer>
-                    <StatsCard
-                      stat={statsForArtist.wins ?? 0}
-                      label={'Wins'}
-                      icon={<IconTrophy />}
-                      subtext={
-                        <>
-                          <span
-                            style={{ color: colors.green, marginRight: '3px', fontWeight: '600' }}
-                          >
-                            {statsForArtist.attempts
-                              ? (100 * (statsForArtist.wins / statsForArtist.attempts)).toFixed(2)
-                              : 0}
-                            %
-                          </span>{' '}
-                          of games won
-                        </>
-                      }
-                    />
-                    <StatsCard
-                      stat={statsForArtist.losses ?? 0}
-                      label={'Losses'}
-                      icon={<IconLoss />}
-                      subtext={
-                        <>
-                          <span
-                            style={{ color: colors.red, marginRight: '3px', fontWeight: '600' }}
-                          >
-                            {statsForArtist.attempts
-                              ? (100 * (statsForArtist.losses / statsForArtist.attempts)).toFixed(2)
-                              : 0}
-                            %
-                          </span>{' '}
-                          of games lost
-                        </>
-                      }
-                    />
-                  </StatsContainer>
-                  <StatsContainer>
-                    <StatsCard
-                      stat={statsForArtist.attempts ?? 0}
-                      label={'Attempts'}
-                      icon={<IconPlay />}
-                      subtext={
-                        <>
-                          <span
-                            style={{ color: colors.green, marginRight: '3px', fontWeight: '600' }}
-                          >
-                            {statsForArtist.attempts
-                              ? (
-                                  100 *
-                                  ((statsForArtist.wins + statsForArtist.losses) /
-                                    statsForArtist.attempts)
-                                ).toFixed(2)
-                              : 0}
-                            %
-                          </span>{' '}
-                          of games finsihed
-                        </>
-                      }
-                    />
-                    <StatsCard
-                      stat={
-                        statsForArtist.attempts > 0
-                          ? statsForArtist.total_guesses /
-                            (statsForArtist.wins + statsForArtist.losses)
-                          : 0
-                      }
-                      label={'Average Guess'}
-                      icon={<IconBrain />}
-                      subtext={
-                        <>
-                          <span
-                            style={{ color: colors.green, marginRight: '3px', fontWeight: '600' }}
-                          >
-                            Top 1%
-                          </span>{' '}
-                          of all {artist.name} fans
-                        </>
-                      }
-                    />
-                  </StatsContainer>
-                </StatsParentContainer>
+                { dbObj && statsForArtist ? (
+                  <StatsParentContainer>
+                    <StatsContainer>
+                      <StatsCard
+                        stat={statsForArtist[dbObj.DAILY_MODE][dbObj.GAMES_WON] ?? 0}
+                        label={'Wins'}
+                        icon={<IconTrophy />}
+                        subtext={
+                          <>
+                            <span
+                              style={{ color: colors.green, marginRight: '3px', fontWeight: '600' }}
+                            >
+                              {statsForArtist[dbObj.DAILY_MODE][dbObj.GAMES_PLAYED]
+                                ? (100 * (statsForArtist[dbObj.DAILY_MODE][dbObj.GAMES_WON] / statsForArtist[dbObj.DAILY_MODE][dbObj.GAMES_PLAYED])).toFixed(2)
+                                : 0}
+                              %
+                            </span>{' '}
+                            of games won
+                          </>
+                        }
+                      />
+                      <StatsCard
+                        stat={statsForArtist[dbObj.DAILY_MODE][dbObj.GAMES_PLAYED] - statsForArtist[dbObj.DAILY_MODE][dbObj.GAMES_WON] ?? 0}
+                        label={'Losses'}
+                        icon={<IconLoss />}
+                        subtext={
+                          <>
+                            <span
+                              style={{ color: colors.red, marginRight: '3px', fontWeight: '600' }}
+                            >
+                              {statsForArtist[dbObj.DAILY_MODE][dbObj.GAMES_PLAYED]
+                                ? (100 * ((statsForArtist[dbObj.DAILY_MODE][dbObj.GAMES_PLAYED] - statsForArtist[dbObj.DAILY_MODE][dbObj.GAMES_WON]) / statsForArtist[dbObj.DAILY_MODE][dbObj.GAMES_PLAYED])).toFixed(2)
+                                : 0}
+                              %
+                            </span>{' '}
+                            of games lost
+                          </>
+                        }
+                      />
+                    </StatsContainer>
+                    <StatsContainer>
+                      <StatsCard
+                        stat={statsForArtist[dbObj.DAILY_MODE][dbObj.GAMES_PLAYED] ?? 0}
+                        label={'Attempts'}
+                        icon={<IconPlay />}
+                        subtext={
+                          <>
+                            <span
+                              style={{ color: colors.green, marginRight: '3px', fontWeight: '600' }}
+                            >
+                              0%
+                            </span>{' '}
+                            of games finsihed
+                          </>
+                        }
+                      />
+                      <StatsCard
+                        stat={
+                          statsForArtist[dbObj.DAILY_MODE][dbObj.MAX_STREAK] > 0
+                            ? statsForArtist[dbObj.DAILY_MODE][dbObj.MAX_STREAK]
+                            : 0
+                        }
+                        label={'Average Guess'}
+                        icon={<IconBrain />}
+                        subtext={
+                          <>
+                            <span
+                              style={{ color: colors.green, marginRight: '3px', fontWeight: '600' }}
+                            >
+                              Top 1%
+                            </span>{' '}
+                            of all {artist.name} fans
+                          </>
+                        }
+                      />
+                    </StatsContainer>
+                  </StatsParentContainer>
+                ) : (
+                  <Loader />
+                )}
+                
               </LeftsideContainer>
               <RightsideContainer>
                 <DevicesContainer>

@@ -21,6 +21,7 @@ import IconLoss from './loss';
 import IconBrain from './brain';
 import IconHome from './home';
 import IconPause from './pause';
+import IconNext from './next';
 
 export {
   IconUser,
@@ -46,4 +47,5 @@ export {
   IconBrain,
   IconHome,
   IconPause,
+  IconNext,
 };

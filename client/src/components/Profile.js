@@ -5,7 +5,8 @@ import ScrollToTop from './ScrollToTop';
 import Nav from './Nav';
 import User from './User';
 import TopTracks from './TopTracks';
-import PlayV2 from './PlayV2';
+import PlayStreak from './PlayStreak';
+import PlayDaily from './PlayDaily';
 import Artist from './Artist';
 import Track from './Track';
 
@@ -30,7 +31,8 @@ const Profile = () => (
         <TopTracks path="tracks" />
         {/* <Play path="play/artist/:artistId" /> */}
         <Artist path="artist/:artistId" />
-        <PlayV2 path="play/artist/:artistId" />
+        <PlayStreak path="streak/artist/:artistId" />
+        <PlayDaily path="daily/artist/:artistId" />
         <Track path="track/:trackId" />
       </ScrollToTop>
     </Router>

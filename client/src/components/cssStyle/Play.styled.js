@@ -86,7 +86,7 @@ export const Artwork = styled.div`
     object-fit: cover;
     border-radius: 100%;
     width: 220px;
-    height: auto;
+    height: 220px;
     box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
     ${media.tablet`
             display: none;
@@ -99,7 +99,7 @@ export const ArtworkSmall = styled.div`
     object-fit: cover;
     border-radius: 100%;
     width: 20px;
-    height: auto;
+    height: 20px;
     margin-right: 10px;
     box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
   }
@@ -382,6 +382,14 @@ export const StatLabel = styled.a`
   font-weight: 600;
   margin-top: ${spacing.xs};
 `;
+export const StreakLabel = styled.a`
+  color: ${colors.lightGrey};
+  font-size: ${fontSizes.sm};
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  margin-bottom: ${spacing.md};
+`;
 export const StatSubtext = styled.a`
   color: ${colors.lightGrey};
   font-size: ${fontSizes.sm};
@@ -514,6 +522,9 @@ export const TracksContainer = styled.ul`
 export const ArtistCardsContainer = styled.div`
   display: flex;
   flex-direction: column;
+  ${media.tablet`
+    display: none;
+    `}
 `;
 
 export const ArtistCardContainer = styled.div`
@@ -538,7 +549,7 @@ export const ArtistCardArtwork = styled.div`
     object-fit: cover;
     border-radius: 100%;
     width: 70px;
-    height: auto;
+    height: 70px;
     box-shadow: 0 4px 60px rgba(0, 0, 0, 0.5);
     ${media.tablet`
         width: 30px;
