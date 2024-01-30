@@ -62,6 +62,9 @@ const { colors, fontSizes } = theme;
 const PlayStreak = props => {
   const { artistId } = props;
   const timerId = useRef();
+  const scrollRef = useRef(null)
+
+  const executeScroll = () => scrollRef.current.scrollIntoView();
 
   const deviceId = props.location.search.split('=')[1] ?? null;
 
@@ -181,8 +184,9 @@ const PlayStreak = props => {
 
   useEffect(() => {
     // when track is selected, play it
-    if (currentTrack)
+    if (currentTrack) {
       playSong();
+    }
   }, [currentTrack]);
 
   useEffect(() => {
@@ -246,25 +250,26 @@ const PlayStreak = props => {
       },
     );
 
+    executeScroll();
     setDisplayedTracks(matchedTracks);
   };
 
   const playSong = timeLimit => {
     if (!currentTrack) return;
-    if (winner || loser) {
-      setTrackIsPlaying(true);
-      startPlayback(currentTrack.id, deviceId, currentTrack.duration_ms - timeLeft);
-      return;
-    }
+    // if (winner || loser) {
+    //   setTrackIsPlaying(true);
+    //   startPlayback(currentTrack.id, deviceId, currentTrack.duration_ms - timeLeft);
+    //   return;
+    // }
 
-    setTrackIsPlaying(true);
-    startPlayback(currentTrack.id, deviceId);
-    setTimeout(function () {
-      pausePlayback(deviceId);
-      setTrackIsPlaying(false);
-      setTimeLeft(currentTrack.duration_ms);
-      setProgressBarPercent(0);
-    }, timeLimit ?? timeLimitsArray[guesses.length]);
+    // setTrackIsPlaying(true);
+    // startPlayback(currentTrack.id, deviceId);
+    // setTimeout(function () {
+    //   pausePlayback(deviceId);
+    //   setTrackIsPlaying(false);
+    //   setTimeLeft(currentTrack.duration_ms);
+    //   setProgressBarPercent(0);
+    // }, timeLimit ?? timeLimitsArray[guesses.length]);
   };
 
   const hardResetGame = () => {
@@ -524,7 +529,7 @@ const PlayStreak = props => {
                   </ActionsContainer>
                 ) : (
                   <div>
-                    <ActionsContainer>
+                    <ActionsContainer ref={scrollRef}>
                       <ContolsBarContainer>
                         <ContolsBarTop>
                           {winner || loser ? (
@@ -573,53 +578,56 @@ const PlayStreak = props => {
                           </PlaybackTime>
                         </PlaybackBar>
                       </ContolsBarContainer>
-                      <div style={{ minWidth: '350px', textAlign: 'center', alignItems: 'flex-end', display: 'flex', flexDirection: 'row', margin: '0 auto' }}>
-                        <div style={{ textAlign: 'center', marginRight: '50px' }}>
-                          <div style={{ fontSize: '55px', fontWeight: 600, color: colors.green }}>
-                            {streak}
-                            {winner && (
-                              <ConfettiExplosion
-                                duration={5000}
-                                particleCount={200}
-                                onComplete={e => console.log('DONE!')}
-                              />
-                            )}
+                      { dbObj ? (
+                        <div style={{ minWidth: '350px', textAlign: 'center', justifyContent: 'center', alignItems: 'flex-end', display: 'flex', flexDirection: 'row', margin: '0 auto' }}>
+                          <div style={{ textAlign: 'center', marginRight: '50px' }}>
+                            <div style={{ fontSize: '55px', fontWeight: 600, color: colors.green }}>
+                              {streak}
+                              {winner && (
+                                <ConfettiExplosion
+                                  duration={5000}
+                                  particleCount={200}
+                                  onComplete={e => console.log('DONE!')}
+                                />
+                              )}
+                            </div>
+                            <StreakLabel>
+                              Current<br />Streak
+                            </StreakLabel>
                           </div>
-                          <StreakLabel>
-                            Current<br />Streak
-                          </StreakLabel>
-                        </div>
-                        <div style={{ textAlign: 'center', marginRight: '50px' }}>
-                          <div style={{ fontSize: '35px', fontWeight: 600, color: colors.green }}>
-                            {dbObj.getStreakModeLongestStreak(artistId) ?? 0}
-                            {winner && (
-                              <ConfettiExplosion
-                                duration={5000}
-                                particleCount={200}
-                                onComplete={e => console.log('DONE!')}
-                              />
-                            )}
+                          <div style={{ textAlign: 'center', marginRight: '50px' }}>
+                            <div style={{ fontSize: '35px', fontWeight: 600, color: colors.green }}>
+                              {dbObj?.getStreakModeLongestStreak(artistId) ?? 0}
+                              {winner && (
+                                <ConfettiExplosion
+                                  duration={5000}
+                                  particleCount={200}
+                                  onComplete={e => console.log('DONE!')}
+                                />
+                              )}
+                            </div>
+                            <StreakLabel>
+                              Max<br />Streak
+                            </StreakLabel>
                           </div>
-                          <StreakLabel>
-                            Max<br />Streak
-                          </StreakLabel>
-                        </div>
-                        <div style={{ textAlign: 'center' }}>
-                          <div style={{ fontSize: '35px', fontWeight: 600, color: colors.green }}>
-                          {dbObj.getStreakModeGamesPlayed(artistId) ?? 0}
-                            {winner && (
-                              <ConfettiExplosion
-                                duration={5000}
-                                particleCount={200}
-                                onComplete={e => console.log('DONE!')}
-                              />
-                            )}
+                          <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '35px', fontWeight: 600, color: colors.green }}>
+                            {dbObj?.getStreakModeGamesPlayed(artistId) ?? 0}
+                              {winner && (
+                                <ConfettiExplosion
+                                  duration={5000}
+                                  particleCount={200}
+                                  onComplete={e => console.log('DONE!')}
+                                />
+                              )}
+                            </div>
+                            <StreakLabel>
+                              Games<br />Played
+                            </StreakLabel>
                           </div>
-                          <StreakLabel>
-                            Games<br />Played
-                          </StreakLabel>
                         </div>
-                      </div>
+                      ) : null}
+                      
                     </ActionsContainer>
                     <ContentContainer>
                       <LeftsideContainer>

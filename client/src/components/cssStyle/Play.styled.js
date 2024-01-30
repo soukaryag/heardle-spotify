@@ -514,8 +514,10 @@ export const TracksContainer = styled.ul`
   flex-direction: column;
   width: 500px;
   margin-top: 50px;
+  min-height: 800px;
   ${media.tablet`
         width: 300px;
+        margin-top: 15px;
     `}
 `;
 

@@ -14,10 +14,21 @@
 
 ## TO-DO
 
-1. Implement daily heardle mode
-2. Rework home page
-3. Add a global stats page
-4. Rework db json (consider moving it to postgres)
+- [ ] Implement daily heardle mode
+    - [ ] Hash generation
+    - [ ] One a day logic implementation - block play if today complete
+    - [ ] Save game state idea if leaving page halfway through the game (save on every guess)
+    - [ ] Stat and progress tracking for daily heardle
+- [ ] Rework streak heardle mode
+    - [ ] More satisfying ultimate win page
+    - [ ] Share to socials button on end game state
+- [ ] Rework home page
+- [ ] Add a global stats page
+- [ ] Rework db json
+    - [x] Create db class
+    - [ ] Consider moving it to postgres/mongodb
+- [ ] Optimize for mobile play
+    - [ ] Particularly with keyboard/search interaction pushing the page around
 
 
 ## Credits
