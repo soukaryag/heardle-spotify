@@ -4,7 +4,7 @@ export const ARTIST_ID = 'artist_id';
 export const STREAK_MODE = 'streak_mode';
 export const DAILY_MODE = 'daily_mode';
 
-export const LAST_FIVE_SONGS = 'last_5_songs';
+export const HISTORY = 'history';
 export const GAMES_PLAYED = 'games_played';
 export const GAMES_WON = 'games_won';
 export const GAMES_LOST = 'games_lost';

@@ -3,15 +3,14 @@ import PropTypes from 'prop-types';
 import ConfettiExplosion from 'react-confetti-explosion';
 import { ColorExtractor } from 'react-color-extractor';
 import ProgressBar from '@ramonak/react-progress-bar';
-import { formatForSearch, formatPlaybackTime, catchErrors } from '../utils';
+import Countdown from 'react-countdown';
+import { formatWithCommas, formatForSearch, formatPlaybackTime, hashIndex, getStartOfTomorrrowUTC, catchErrors } from '../utils';
 import {
   getAllAlbumsByArtist,
   getAllTracksByAlbum,
   getArtist,
   startPlayback,
   pausePlayback,
-  getDatabase,
-  setDatabase,
   getUserInfo,
 } from '../spotify';
 import { Database } from '../database';
@@ -20,7 +19,7 @@ import Loader from './Loader';
 import TrackItem from './TrackItem';
 
 import { theme } from '../styles';
-import { IconPlay, IconMicrophone, IconReset, IconBack, IconForward, IconPause } from './icons';
+import { IconPlay, IconVerified, IconBack, IconForward, IconPause } from './icons';
 import {
   PageContainer,
   BannerHeader,
@@ -31,6 +30,7 @@ import {
   AristContainer,
   ArtworkSmall,
   AlbumArtwork,
+  Artwork,
   ArtistInfoContainer,
   VerifiedArtistContainer,
   ArtistName,
@@ -40,8 +40,8 @@ import {
   LeftsideContainer,
   RightsideContainer,
   ActionsContainer,
-  SecondaryButton,
-  SecondaryButtonDisabled,
+  IconBackground,
+  Number,
   PlayButton,
   GuessContainer,
   GuessInput,
@@ -57,6 +57,8 @@ import {
   PlaybackBar,
   PlaybackTime,
   PlaybackProgressBarContainer,
+  StreakLabel,
+  StartButtonA
 } from './cssStyle/Play.styled';
 const { colors, fontSizes } = theme;
 
@@ -68,9 +70,9 @@ const PlayDaily = props => {
 
   const [artist, setArtist] = useState(null);
   const [tracks, setTracks] = useState([]);
+  const [completedToday, setCompletedToday] = useState(null);
+  const [dailyHistory, setDailyHistory] = useState([]);
   const [currentTrack, setCurrentTrack] = useState(null);
-  const [allTracksPlayed, setAllTracksPlayed] = useState([]);
-  const [streak, setStreak] = useState(0);
   const [currentTrackArtistPictures, setCurrentTrackArtistPictures] = useState({});
   const [gradientColor, setGradientColor] = useState(colors.black);
 
@@ -105,6 +107,19 @@ const PlayDaily = props => {
 
     let databaseObj = new Database(user.id);
     setDbObj(databaseObj);
+
+    const completed = databaseObj.dailyModeCompletedToday(artistId);
+    setCompletedToday(completed);
+    if (completed) {
+      console.log("Already completed today's!");
+    } else {
+      const inProgress = databaseObj.getInProgressDailyMode(artistId);
+      if (inProgress) {
+        setGuesses(inProgress[databaseObj.GUESSES_ARRAY] ?? []);
+      }
+      setDailyHistory(databaseObj.getDailyModeHistory(artistId));
+    }
+    
   }, [user]);
 
 
@@ -116,16 +131,10 @@ const PlayDaily = props => {
       setLoser(true);
 
       if (dbObj) {
-        dbObj.updateStreakMode(artistId, 1);
+        dbObj.updateDailyMode(artistId, false, currentTrack.id, 5);
       }
-    //   let db = getDatabase();
-    //   db[artistId].losses = db[artistId].losses + 1;
-    //   db[artistId].total_guesses = db[artistId].total_guesses + guesses.length;
-    //   db[artistId].last_5_songs.push(currentTrack);
-    //   if (db[artistId].last_5_songs.length > 5) {
-    //     db[artistId].last_5_songs.pop();
-    //   }
-    //   setDatabase(db);
+    } else {
+
     }
   }, [guesses]);
 
@@ -162,7 +171,12 @@ const PlayDaily = props => {
     }, []);
   };
 
+
   useEffect(() => {
+    if (dailyHistory === undefined || dailyHistory === null) return;
+
+    if (completedToday !== false) return;
+
     // fetches all relevant tracks minus remixes and live renditions
     const fetchData = async () => {
       const { data } = await getAllAlbumsByArtist(artistId);
@@ -170,7 +184,11 @@ const PlayDaily = props => {
       setTracks(allTracks);
 
       let pickedTrack = null;
-      while (!pickedTrack || allTracksPlayed.includes(pickedTrack.id)) {
+      let tracksAllowed = allTracks.filter(x => !dailyHistory.includes(x.id));
+      if (tracksAllowed.length > 0) {
+        const hsh = hashIndex(artistId, tracksAllowed.length)
+        pickedTrack = tracksAllowed[hsh];
+      } else {
         pickedTrack = allTracks[Math.floor(Math.random() * allTracks.length)];
       }
 
@@ -180,12 +198,13 @@ const PlayDaily = props => {
         toAdd[e.id] = data.images[0].url;
         setCurrentTrackArtistPictures(prevState => ({ ...prevState, ...toAdd }));
       });
+      
       setTimeLeft(pickedTrack.duration_ms);
       setCurrentTrack(pickedTrack);
     };
 
     catchErrors(fetchData());
-  }, [artistId]);
+  }, [artistId, dailyHistory]);
 
   useEffect(() => {
     // gets artist data and set's page name
@@ -213,14 +232,6 @@ const PlayDaily = props => {
     setTrackIsPlaying(false);
     setDisplayedTracks(false);
     setGuesses([]);
-    for (let i = 0; i < 5; i++) {
-      let inputElement = document.getElementById(`guess${i}`);
-      if (inputElement) {
-        inputElement.setAttribute(
-          `style", "background-color: ${colors.darkGrey}; border: 2px solid ${colors.darkGrey}`,
-        );
-      }
-    }
   }, []);
 
   useEffect(() => {
@@ -292,9 +303,9 @@ const PlayDaily = props => {
   };
 
   const checkGuess = track => {
+    if (!dbObj) return;
+
     const currId = guesses.length;
-    const inputElement = document.getElementById(`guess${currId}`);
-    inputElement.value = track.name;
 
     if (currId === 0 && dbObj) {
       // once a single guess is made, init the artist in the db
@@ -321,26 +332,30 @@ const PlayDaily = props => {
       track.name.toLowerCase().indexOf(currentTrack.name) !== -1
     ) {
       // got it! WINNER
-      inputElement.setAttribute('style', 'background-color: #1DB954; border: 2px solid #1DB954');
-      inputElement.disabled = true;
       setTrackIsPlaying(true);
       startPlayback(currentTrack.id, deviceId);
       setDisplayedTracks([currentTrack]);
       setWinner(true);
 
-      if (dbObj) {
-        dbObj.updateStreakMode(artistId, 1);
-      }
+      dbObj.updateDailyMode(artistId, true, currentTrack.id, currId + 1);
+
+      const inputElement = document.getElementById(`guess${currId}`);
+      inputElement.value = track.name;
+      inputElement.setAttribute('style', 'background-color: #1DB954; border: 2px solid #1DB954');
+      inputElement.disabled = true;
+
     } else if (track.album?.name === currentTrack.album.name) {
       // same album
-      inputElement.setAttribute('style', 'background-color: #f6cd61; border: 2px solid #f6cd61');
       playSong(timeLimitsArray[currId + 1]);
-      setGuesses(currGuesses => [...currGuesses, track.name]);
+      dbObj.saveInProgressDailyMode(artistId, [...guesses, {name: track.name, color: 1}]);
+
+      setGuesses(currGuesses => [...currGuesses, {name: track.name, color: 1}]);
     } else {
       // wrong
-      inputElement.setAttribute('style', 'background-color: #69202f; border: 2px solid #69202f');
       playSong(timeLimitsArray[currId + 1]);
-      setGuesses(currGuesses => [...currGuesses, track.name]);
+      dbObj.saveInProgressDailyMode(artistId, [...guesses, {name: track.name, color: 0}]);
+      
+      setGuesses(currGuesses => [...currGuesses, {name: track.name, color: 0}]);
     }
 
     if (currId < 3) {
@@ -417,12 +432,12 @@ const PlayDaily = props => {
             backgroundImage: `linear-gradient(${gradientColor}, ${colors.black} 90%)`,
           }}
         >
-          {currentTrack && deviceId ? (
-            <>
+          { completedToday ? (
+            <div>
               <BannerHeader>
-                <ColorExtractor getColors={colors => setGradientColor(colors[1])}>
+                <ColorExtractor getColors={colors => setGradientColor(colors[2])}>
                   <img
-                    src={currentTrack.album.images[0].url}
+                    src={artist.images[0].url}
                     style={{
                       display: 'none',
                     }}
@@ -431,7 +446,7 @@ const PlayDaily = props => {
                 <NavigationContainer>
                   <NavButtonContainer>
                     <ButtonContainer
-                      onClick={e => window.history.go(-1)}
+                      onClick={e => window.location.href = `/artist/${artistId}`}
                       style={{ marginRight: '10px' }}
                     >
                       <IconBack />
@@ -445,230 +460,377 @@ const PlayDaily = props => {
                   </LinkContainer>
                 </NavigationContainer>
                 <AristContainer>
-                  <AlbumArtwork>
-                    {albumGuessed ? (
-                      <img src={currentTrack.album.images[1].url} alt="Album Artwork" />
-                    ) : (
-                      <img
-                        src={
-                          'https://media.pitchfork.com/photos/5a78bdf7aa1f611d13c97b96/master/pass/SpotifyCredits.jpg'
-                        }
-                        alt="Unkown Artwork"
-                      />
-                    )}
-                  </AlbumArtwork>
+                  <Artwork>
+                    <img src={artist.images[1].url} alt="Artist Artwork" />
+                  </Artwork>
                   <ArtistInfoContainer>
                     <VerifiedArtistContainer>
+                      <IconBackground />
+                      <div style={{ color: '#3d91f4', height: '20px', width: '20px', zIndex: 1 }}>
+                        <IconVerified />
+                      </div>
                       <div style={{ margin: 'auto 6px', fontWeight: 600, fontSize: fontSizes.sm }}>
-                        Album
+                        Verified Artist
                       </div>
                     </VerifiedArtistContainer>
                     <ArtistName
-                      href={
-                        albumGuessed
-                          ? `https://open.spotify.com/album/${currentTrack.album.id}`
-                          : null
-                      }
+                      href={artist.external_urls.spotify}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {albumGuessed ? currentTrack.album.name ?? '' : '???'}
+                      {artist.name}
                     </ArtistName>
-                    <div
-                      style={{
-                        paddingBottom: '10px',
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                      }}
-                    >
-                      {winner && (
-                        <ConfettiExplosion
-                          duration={5000}
-                          particleCount={200}
-                          onComplete={e => console.log('DONE!')}
-                        />
-                      )}
-                      <ArtworkSmall style={{ width: '20px', height: '20px', marginRight: '10px' }}>
-                        <img
-                          style={{ width: '20px', height: '20px' }}
-                          src={artist.images[1].url}
-                          alt="Artist Artwork"
-                        />
-                      </ArtworkSmall>
-                      <ArtistNameLink to={`/artist/${artistId}`}>{artist.name}</ArtistNameLink>
+                    <div style={{ paddingBottom: '10px' }}>
+                      <Number>{formatWithCommas(artist.followers.total)} Followers</Number>
                     </div>
                   </ArtistInfoContainer>
                 </AristContainer>
               </BannerHeader>
               <BodyContainer>
-                <ActionsContainer>
-                  <ContolsBarContainer>
-                    <ContolsBarTop>
-                      {winner || loser ? (
-                        <SecondaryButton to={`/track/${currentTrack.id}`}>
-                          <IconMicrophone />
-                        </SecondaryButton>
-                      ) : (
-                        <SecondaryButtonDisabled>
-                          <IconMicrophone />
-                        </SecondaryButtonDisabled>
-                      )}
-                      <PlayButton onClick={e => playSong()}>
-                        {trackIsPlaying ? <IconPause /> : <IconPlay />}
-                      </PlayButton>
-
-                    </ContolsBarTop>
-                    <PlaybackBar>
-                      <PlaybackTime>
-                        {timeLeft
-                          ? formatPlaybackTime(currentTrack.duration_ms - timeLeft)
-                          : '0:00'}
-                      </PlaybackTime>
-                      <PlaybackProgressBarContainer>
-                        <ProgressBar
-                          completed={progressBarPercent ? progressBarPercent : 0}
-                          baseBgColor="hsla(0,0%,100%,.3)"
-                          bgColor="#fff"
-                          height="4px"
-                          width="280px"
-                        />
-                      </PlaybackProgressBarContainer>
-                      <PlaybackTime>
-                        {winner || loser ? formatPlaybackTime(currentTrack.duration_ms) : '?:??'}
-                      </PlaybackTime>
-                    </PlaybackBar>
-                  </ContolsBarContainer>
-                </ActionsContainer>
                 <ContentContainer>
-                  <LeftsideContainer>
-                    <GuessContainer>
-                      <GuessInput
-                        id="guess0"
-                        key="guess0"
-                        autoComplete="off"
-                        placeholder="Type your guess..."
-                        onChange={e => displayTracks(e.target.value.toLowerCase())}
-                        onKeyUp={handleKeyPress}
-                        disabled={guesses.length > 0}
-                        autoFocus={guesses.length === 0}
-                      />
-                      <GuessInput
-                        id="guess1"
-                        key="guess1"
-                        autoComplete="off"
-                        placeholder="Type your guess..."
-                        onChange={e => displayTracks(e.target.value.toLowerCase())}
-                        onKeyUp={handleKeyPress}
-                        disabled={guesses.length > 1}
-                        style={{ display: guesses.length < 1 ? 'none' : null }}
-                        autoFocus={guesses.length === 1}
-                      />
-                      <GuessInput
-                        id="guess2"
-                        key="guess2"
-                        autoComplete="off"
-                        placeholder="Type your guess..."
-                        onChange={e => displayTracks(e.target.value.toLowerCase())}
-                        onKeyUp={handleKeyPress}
-                        disabled={guesses.length > 2}
-                        style={{ display: guesses.length < 2 ? 'none' : null }}
-                        autoFocus={guesses.length === 2}
-                      />
-                      <GuessInput
-                        id="guess3"
-                        key="guess3"
-                        autoComplete="off"
-                        placeholder="Type your guess..."
-                        onChange={e => displayTracks(e.target.value.toLowerCase())}
-                        onKeyUp={handleKeyPress}
-                        disabled={guesses.length > 3}
-                        style={{ display: guesses.length < 3 ? 'none' : null }}
-                        autoFocus={guesses.length === 3}
-                      />
-                      <GuessInput
-                        id="guess4"
-                        key="guess4"
-                        autoComplete="off"
-                        placeholder="Type your guess..."
-                        onChange={e => displayTracks(e.target.value.toLowerCase())}
-                        onKeyUp={handleKeyPress}
-                        disabled={guesses.length > 4}
-                        style={{ display: guesses.length < 4 ? 'none' : null }}
-                        autoFocus={guesses.length === 4}
-                      />
-                    </GuessContainer>
-                    <TracksContainer>
-                      {displayedTracks
-                        ? displayedTracks.map((track, i) => (
-                            <TrackItem
-                              track={track}
-                              onClick={e => {
-                                if (!winner && !loser) {
-                                  checkGuess(track);
-                                }
-                              }}
-                              selected={trackSelectedFromSearch === i}
-                              key={i}
-                            />
-                          ))
-                        : null}
-                    </TracksContainer>
+                  <LeftsideContainer style={{ margin: '0 auto', textAlign: 'center' }}>
+                    <ArtistName style={{ fontSize: '40px', marginBottom: '20px' }}>
+                      Statistics
+                    </ArtistName>
+                    <div style={{ minWidth: '350px', textAlign: 'center', justifyContent: 'center', alignItems: 'flex-end', display: 'flex', flexDirection: 'row', margin: '0 auto' }}>
+                      <div style={{ textAlign: 'center', marginRight: '50px', paddingBottom: '6px' }}>
+                        <div style={{ fontSize: '55px', fontWeight: 600, color: colors.green }}>
+                          {dbObj?.getDailyModeGamesPlayed(artistId) ?? 0}
+                        </div>
+                        <StreakLabel>
+                          Played
+                        </StreakLabel>
+                      </div>
+                      <div style={{ textAlign: 'center', marginRight: '50px', paddingBottom: '6px' }}>
+                        <div style={{ fontSize: '55px', fontWeight: 600, color: colors.green }}>
+                          {dbObj?.getDailyModeWinPercentage(artistId) ?? 0}
+                        </div>
+                        <StreakLabel>
+                          Win %
+                        </StreakLabel>
+                      </div>
+                      <div style={{ textAlign: 'center', marginRight: '50px' }}>
+                        <div style={{ fontSize: '55px', fontWeight: 600, color: colors.green }}>
+                          {dbObj?.getDailyModeLongestStreak(artistId) ?? 0}
+                        </div>
+                        <StreakLabel>
+                          Max<br />Streak
+                        </StreakLabel>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '55px', fontWeight: 600, color: colors.green }}>
+                          {dbObj?.getDailyModeCurrentStreak(artistId) ?? 0}
+                        </div>
+                        <StreakLabel>
+                          Current<br />Streak
+                        </StreakLabel>
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: '50px' }}>
+                      <ArtistName style={{ fontSize: '25px' }}>
+                        Guess Distribution
+                      </ArtistName>
+                      <div style={{ width: '300px', height: '200px', backgroundColor: colors.grey, borderRadius: '4px', margin: '0 auto', marginTop: '10px' }}>
+                      
+                      </div>
+                    </div>
+
+                    <div style={{ marginTop: '50px', marginBottom: '50px', display: 'flex', flexDirection: 'row', justifyContent: 'space-between', minWidth: '400px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', borderRight: '1px solid white', padding: '5px 20px' }}>
+                        <ArtistName style={{ fontSize: '20px', color: colors.grey, marginBottom: '5px' }}>
+                          Next Heardle
+                        </ArtistName>
+                        <ArtistName style={{ fontSize: '30px' }}>
+                          <Countdown date={getStartOfTomorrrowUTC()} />
+                        </ArtistName>
+                      </div>
+                      <div style={{ padding: '5px', justifyContent: 'center', alignItems: 'center' }}>
+                        <StartButtonA 
+                          onClick={e => {
+                            navigator.clipboard.writeText('Work in progress');
+                            alert('Copied stats to clipboard!');
+                          }}
+                        >
+                          Share
+                        </StartButtonA>
+                      </div>
+                    </div>
+                    
                   </LeftsideContainer>
-                  <RightsideContainer style={{ margin: 0, paddingTop: 0 }}>
-                    <ArtistCardsContainer>
-                      <ArtistCardContainer
-                        id={`ArtistCardContainer${-1}`}
-                        key={`ArtistCardContainer${-1}`}
-                      >
-                        <ArtistCardArtwork>
-                          <img src={artist.images[0].url} alt="Artist Artwork" />
-                        </ArtistCardArtwork>
-                        <ArtistCardInfo>
-                          <ArtistCardLabel>Artist</ArtistCardLabel>
-                          <ArtistCardName>{artist.name}</ArtistCardName>
-                        </ArtistCardInfo>
-                      </ArtistCardContainer>
-                      {currentTrack.artists?.map((item, i) =>
-                        item.id !== artistId ? (
-                          <ArtistCardContainer
-                            id={`ArtistCardContainer${i}`}
-                            key={`ArtistCardContainer${i}`}
-                          >
-                            <ArtistCardArtwork>
-                              {artistsGuessed.includes(item.id) ? (
-                                <img
-                                  src={
-                                    currentTrackArtistPictures[item.id] ??
-                                    'https://i.pinimg.com/474x/f1/da/a7/f1daa70c9e3343cebd66ac2342d5be3f.jpg'
-                                  }
-                                  alt="Artist Artwork"
-                                />
-                              ) : (
-                                <img
-                                  src={
-                                    'https://i.pinimg.com/736x/fd/b6/de/fdb6dea1b13458837c6e56361d2c2771.jpg'
-                                  }
-                                  alt="Artist Artwork"
-                                />
-                              )}
-                            </ArtistCardArtwork>
-                            <ArtistCardInfo>
-                              <ArtistCardLabel>Artist</ArtistCardLabel>
-                              <ArtistCardName>
-                                {artistsGuessed.includes(item.id) ? item.name : '???'}
-                              </ArtistCardName>
-                            </ArtistCardInfo>
-                          </ArtistCardContainer>
-                        ) : null,
-                      )}
-                    </ArtistCardsContainer>
-                  </RightsideContainer>
                 </ContentContainer>
               </BodyContainer>
-            </>
+            </div>
           ) : (
-            <Loader />
+            currentTrack && deviceId ? (
+              <div>
+                <BannerHeader>
+                  <ColorExtractor getColors={colors => setGradientColor(colors[1])}>
+                    <img
+                      src={currentTrack.album.images[0].url}
+                      style={{
+                        display: 'none',
+                      }}
+                    />
+                  </ColorExtractor>
+                  <NavigationContainer>
+                    <NavButtonContainer>
+                      <ButtonContainer
+                        onClick={e => window.history.go(-1)}
+                        style={{ marginRight: '10px' }}
+                      >
+                        <IconBack />
+                      </ButtonContainer>
+                      <ButtonContainer style={{ cursor: 'not-allowed', opacity: 0.6 }}>
+                        <IconForward />
+                      </ButtonContainer>
+                    </NavButtonContainer>
+                    <LinkContainer to={'/'}>
+                      <img src={user.images[1].url} alt="avatar" />
+                    </LinkContainer>
+                  </NavigationContainer>
+                  <AristContainer>
+                    <AlbumArtwork>
+                      {albumGuessed ? (
+                        <img src={currentTrack.album.images[1].url} alt="Album Artwork" />
+                      ) : (
+                        <img
+                          src={
+                            'https://media.pitchfork.com/photos/5a78bdf7aa1f611d13c97b96/master/pass/SpotifyCredits.jpg'
+                          }
+                          alt="Unkown Artwork"
+                        />
+                      )}
+                    </AlbumArtwork>
+                    <ArtistInfoContainer>
+                      <VerifiedArtistContainer>
+                        <div style={{ margin: 'auto 6px', fontWeight: 600, fontSize: fontSizes.sm }}>
+                          Album
+                        </div>
+                      </VerifiedArtistContainer>
+                      <ArtistName
+                        href={
+                          albumGuessed
+                            ? `https://open.spotify.com/album/${currentTrack.album.id}`
+                            : null
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {albumGuessed ? currentTrack.album.name ?? '' : '???'}
+                      </ArtistName>
+                      <div
+                        style={{
+                          paddingBottom: '10px',
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                        }}
+                      >
+                        {winner && (
+                          <ConfettiExplosion
+                            duration={5000}
+                            particleCount={200}
+                            onComplete={e => console.log('DONE!')}
+                          />
+                        )}
+                        <ArtworkSmall style={{ width: '20px', height: '20px', marginRight: '10px' }}>
+                          <img
+                            style={{ width: '20px', height: '20px' }}
+                            src={artist.images[1].url}
+                            alt="Artist Artwork"
+                          />
+                        </ArtworkSmall>
+                        <ArtistNameLink to={`/artist/${artistId}`}>{artist.name}</ArtistNameLink>
+                      </div>
+                    </ArtistInfoContainer>
+                  </AristContainer>
+                </BannerHeader>
+                <BodyContainer>
+                  <ActionsContainer>
+                    <ContolsBarContainer>
+                      <ContolsBarTop>
+                        <PlayButton onClick={e => playSong()}>
+                          {trackIsPlaying ? <IconPause /> : <IconPlay />}
+                        </PlayButton>
+                      </ContolsBarTop>
+                      <PlaybackBar>
+                        <PlaybackTime>
+                          {timeLeft
+                            ? formatPlaybackTime(currentTrack.duration_ms - timeLeft)
+                            : '0:00'}
+                        </PlaybackTime>
+                        <PlaybackProgressBarContainer>
+                          <ProgressBar
+                            completed={progressBarPercent ? progressBarPercent : 0}
+                            baseBgColor="hsla(0,0%,100%,.3)"
+                            bgColor="#fff"
+                            height="4px"
+                            width="280px"
+                          />
+                        </PlaybackProgressBarContainer>
+                        <PlaybackTime>
+                          {winner || loser ? formatPlaybackTime(currentTrack.duration_ms) : '?:??'}
+                        </PlaybackTime>
+                      </PlaybackBar>
+                    </ContolsBarContainer>
+                  </ActionsContainer>
+                  <ContentContainer>
+                    <LeftsideContainer>
+                      <GuessContainer>
+                        <GuessInput
+                          id="guess0"
+                          key="guess0"
+                          autoComplete="off"
+                          placeholder="Type your guess..."
+                          value={ guesses.length > 0 ? guesses[0]['name'] : null}
+                          onChange={e => displayTracks(e.target.value.toLowerCase())}
+                          onKeyUp={handleKeyPress}
+                          disabled={guesses.length > 0}
+                          autoFocus={guesses.length === 0}
+                          style={guesses.length > 0 ? (
+                            guesses[0]['color'] === 0 ? {backgroundColor: '#69202f', border: '2px solid #69202f'} :
+                            guesses[0]['color'] === 1 ? {backgroundColor: '#f6cd61', border: '2px solid #f6cd61'} :
+                            guesses[0]['color'] === 2 ? {backgroundColor: '#1DB954', border: '2px solid #1DB954'} : null
+                          ) : null}
+                        />
+                        <GuessInput
+                          id="guess1"
+                          key="guess1"
+                          autoComplete="off"
+                          placeholder="Type your guess..."
+                          value={ guesses.length > 1 ? guesses[1]['name'] : null}
+                          onChange={e => displayTracks(e.target.value.toLowerCase())}
+                          onKeyUp={handleKeyPress}
+                          disabled={guesses.length > 1}
+                          autoFocus={guesses.length === 1}
+                          style={guesses.length > 1 ? (
+                            guesses[1]['color'] === 0 ? {backgroundColor: '#69202f', border: '2px solid #69202f'} :
+                            guesses[1]['color'] === 1 ? {backgroundColor: '#f6cd61', border: '2px solid #f6cd61'} :
+                            guesses[1]['color'] === 2 ? {backgroundColor: '#1DB954', border: '2px solid #1DB954'} : null
+                          ) : guesses.length < 1 ? { display: 'none' } : null}
+                        />
+                        <GuessInput
+                          id="guess2"
+                          key="guess2"
+                          autoComplete="off"
+                          placeholder="Type your guess..."
+                          value={ guesses.length > 2 ? guesses[2]['name'] : null}
+                          onChange={e => displayTracks(e.target.value.toLowerCase())}
+                          onKeyUp={handleKeyPress}
+                          disabled={guesses.length > 2}
+                          autoFocus={guesses.length === 2}
+                          style={guesses.length > 2 ? (
+                            guesses[2]['color'] === 0 ? {backgroundColor: '#69202f', border: '2px solid #69202f'} :
+                            guesses[2]['color'] === 1 ? {backgroundColor: '#f6cd61', border: '2px solid #f6cd61'} :
+                            guesses[2]['color'] === 2 ? {backgroundColor: '#1DB954', border: '2px solid #1DB954'} : null
+                          ) : guesses.length < 2 ? { display: 'none' } : null}
+                        />
+                        <GuessInput
+                          id="guess3"
+                          key="guess3"
+                          autoComplete="off"
+                          placeholder="Type your guess..."
+                          value={ guesses.length > 3 ? guesses[3]['name'] : null}
+                          onChange={e => displayTracks(e.target.value.toLowerCase())}
+                          onKeyUp={handleKeyPress}
+                          disabled={guesses.length > 3}
+                          autoFocus={guesses.length === 3}
+                          style={guesses.length > 3 ? (
+                            guesses[3]['color'] === 0 ? {backgroundColor: '#69202f', border: '2px solid #69202f'} :
+                            guesses[3]['color'] === 1 ? {backgroundColor: '#f6cd61', border: '2px solid #f6cd61'} :
+                            guesses[3]['color'] === 2 ? {backgroundColor: '#1DB954', border: '2px solid #1DB954'} : null
+                          ) : guesses.length < 3 ? { display: 'none' } : null}
+                        />
+                        <GuessInput
+                          id="guess4"
+                          key="guess4"
+                          autoComplete="off"
+                          placeholder="Type your guess..."
+                          value={ guesses.length > 4 ? guesses[4]['name'] : null}
+                          onChange={e => displayTracks(e.target.value.toLowerCase())}
+                          onKeyUp={handleKeyPress}
+                          disabled={guesses.length > 4}
+                          autoFocus={guesses.length === 4}
+                          style={guesses.length > 4 ? (
+                            guesses[4]['color'] === 0 ? {backgroundColor: '#69202f', border: '2px solid #69202f'} :
+                            guesses[4]['color'] === 1 ? {backgroundColor: '#f6cd61', border: '2px solid #f6cd61'} :
+                            guesses[4]['color'] === 2 ? {backgroundColor: '#1DB954', border: '2px solid #1DB954'} : null
+                          ) : guesses.length < 4 ? { display: 'none' } : null}
+                        />
+                      </GuessContainer>
+                      <TracksContainer>
+                        {displayedTracks
+                          ? displayedTracks.map((track, i) => (
+                              <TrackItem
+                                track={track}
+                                onClick={e => {
+                                  if (!winner && !loser) {
+                                    checkGuess(track);
+                                  }
+                                }}
+                                selected={trackSelectedFromSearch === i}
+                                key={i}
+                              />
+                            ))
+                          : null}
+                      </TracksContainer>
+                    </LeftsideContainer>
+                    <RightsideContainer style={{ margin: 0, paddingTop: 0 }}>
+                      <ArtistCardsContainer>
+                        <ArtistCardContainer
+                          id={`ArtistCardContainer${-1}`}
+                          key={`ArtistCardContainer${-1}`}
+                        >
+                          <ArtistCardArtwork>
+                            <img src={artist.images[0].url} alt="Artist Artwork" />
+                          </ArtistCardArtwork>
+                          <ArtistCardInfo>
+                            <ArtistCardLabel>Artist</ArtistCardLabel>
+                            <ArtistCardName>{artist.name}</ArtistCardName>
+                          </ArtistCardInfo>
+                        </ArtistCardContainer>
+                        {currentTrack.artists?.map((item, i) =>
+                          item.id !== artistId ? (
+                            <ArtistCardContainer
+                              id={`ArtistCardContainer${i}`}
+                              key={`ArtistCardContainer${i}`}
+                            >
+                              <ArtistCardArtwork>
+                                {artistsGuessed.includes(item.id) ? (
+                                  <img
+                                    src={
+                                      currentTrackArtistPictures[item.id] ??
+                                      'https://i.pinimg.com/474x/f1/da/a7/f1daa70c9e3343cebd66ac2342d5be3f.jpg'
+                                    }
+                                    alt="Artist Artwork"
+                                  />
+                                ) : (
+                                  <img
+                                    src={
+                                      'https://i.pinimg.com/736x/fd/b6/de/fdb6dea1b13458837c6e56361d2c2771.jpg'
+                                    }
+                                    alt="Artist Artwork"
+                                  />
+                                )}
+                              </ArtistCardArtwork>
+                              <ArtistCardInfo>
+                                <ArtistCardLabel>Artist</ArtistCardLabel>
+                                <ArtistCardName>
+                                  {artistsGuessed.includes(item.id) ? item.name : '???'}
+                                </ArtistCardName>
+                              </ArtistCardInfo>
+                            </ArtistCardContainer>
+                          ) : null,
+                        )}
+                      </ArtistCardsContainer>
+                    </RightsideContainer>
+                  </ContentContainer>
+                </BodyContainer>
+              </div>
+            ) : (
+              <Loader />
+            )
           )}
         </PageContainer>
       ) : (

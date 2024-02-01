@@ -14,13 +14,19 @@
 
 ## TO-DO
 
+### Frontend
 - [ ] Add modals with instructions!!!! (3pt)
+- [ ] Artist page
+    - [ ] Rework stat cards based on new format
 - [ ] Implement daily heardle mode
-    - [ ] Hash generation (2pt)
-    - [ ] One a day logic implementation - block play if today complete (1pt)
-    - [ ] Save game state idea if leaving page halfway through the game (save on every guess) (2pt)
+    - [x] Hash generation (2pt)
+    - [x] One a day logic implementation - block play if today complete (1pt)
+    - [x] Save game state idea if leaving page halfway through the game (save on every guess) (2pt)
     - [ ] Stat and progress tracking for daily heardle  (3pt)
-    - [ ] Win/loss state similar to wordle but prettier :O (2pt)
+    - [x] Win/loss state similar to wordle but prettier :O (2pt)
+    - [x] Bug on load for new artists
+    - [ ] Sleep for 3 seconds before displaying stats screen (modal?)
+    - [ ] Consider limiting daily mode to user's top 5 artists only (supply demand management)
 - [ ] Rework streak heardle mode
     - [ ] More satisfying ultimate win page (2pt)
     - [ ] Share to socials button on end game state (2pt)
@@ -36,6 +42,11 @@
 - [ ] General enhancements
     - [ ] Fix the back and fwd buttons, right now they just does history(-1), but that's wrong (1pt)
 
+### Backend
+- [ ] Complete refactor and abstraction of code (it's ugh lee right now)
+- [ ] Add schemas, design database structure and collections
+- [ ] Use spotify as primary auth to fetch user data from mongo
+- [ ] Rework frontend to connect to backend endpoints for data flow, tear down cached data
 
 ## Credits
 

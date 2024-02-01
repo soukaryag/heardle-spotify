@@ -250,6 +250,23 @@ export const ButtonsContainer = styled.div`
     flex-direction: column;
     `};
 `;
+export const StartButtonA = styled.a`
+  display: inline-block;
+  background-color: ${colors.green};
+  color: ${colors.white};
+  border-radius: 30px;
+  padding: 17px 35px;
+  min-width: 160px;
+  max-width: 225px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+  &:hover,
+  &:focus {
+    background-color: ${colors.offGreen};
+  }
+`;
 export const StartButton = styled(Link)`
   display: inline-block;
   background-color: ${colors.green};

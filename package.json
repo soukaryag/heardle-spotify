@@ -9,10 +9,9 @@
   "keywords": [],
   "author": "Soukarya Ghosh",
   "license": "ISC",
-  "bugs": {
-  },
+  "bugs": {},
   "engines": {
-    "node": "16.14.0"
+    "node": "16.20.1"
   },
   "scripts": {
     "client:install": "cd client && yarn",
@@ -36,13 +35,20 @@
     }
   },
   "dependencies": {
+    "chai": "^5.0.3",
+    "chai-http": "^4.4.0",
     "connect-history-api-fallback": "^1.6.0",
     "cookie-parser": "1.4.4",
     "cors": "^2.8.5",
     "dotenv": "^8.1.0",
     "express": "~4.17.1",
+    "mocha": "^10.2.0",
+    "mongodb": "^6.3.0",
+    "mongoose": "^8.1.1",
     "querystring": "~0.2.0",
-    "request": "~2.88.0"
+    "request": "~2.88.0",
+    "should": "^13.2.3",
+    "supertest": "^6.3.4"
   },
   "devDependencies": {
     "@upstatement/eslint-config": "^3.0.0",

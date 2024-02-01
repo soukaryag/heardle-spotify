@@ -8,11 +8,12 @@ export class Database {
     STREAK_MODE = 'streak_mode';
     DAILY_MODE = 'daily_mode';
 
-    LAST_FIVE_SONGS = 'last_5_songs';
+    HISTORY = 'history';
     GAMES_PLAYED = 'games_played';
     GAMES_WON = 'games_won';
     GAMES_LOST = 'games_lost';
     LAST_WIN_DATE = 'last_win_date';
+    LAST_COMPLETED_DATE = 'last_completed_date';
     CURRENT_STREAK = 'current_streak';
     MAX_STREAK = 'max_streak';
     GUESS_DIST = 'guess_dist';
@@ -28,6 +29,8 @@ export class Database {
             };
             this.saveDatabase(this.db);
         }
+
+        this.cache_size = 5;
     }
 
     get database() {
@@ -51,7 +54,8 @@ export class Database {
             daily_mode: {
                 games_played: 0,
                 games_won: 0,
-                last_five_songs: [],
+                history: [],
+                last_completed_date: null,
                 last_win_date: null,
                 current_streak: 0,
                 max_streak: 0,
@@ -91,14 +95,7 @@ export class Database {
         if (!this.artistExists(artist_id)) 
             return false;
         
-        return this.isToday(this.getArtistById(artist_id)[this.DAILY_MODE][this.LAST_WIN_DATE]);
-    }
-
-    dailyModeState(artist_id) {
-        if (!this.artistExists(artist_id)) 
-            return null;
-        
-        return this.getArtistById(artist_id)[this.DAILY_MODE][this.CURRENT_GAME_STATE];
+        return this.isToday(this.getArtistById(artist_id)[this.DAILY_MODE][this.LAST_COMPLETED_DATE]);
     }
 
     // CREATE METHODS
@@ -111,7 +108,7 @@ export class Database {
     }
 
     // DAILY MODE
-    updateDailyMode(artist_id, won, track, guesses = null) {
+    updateDailyMode(artist_id, won, track_id, guesses = null) {
         if (!this.artistExists(artist_id)) 
             this.createArtist(artist_id);
         
@@ -119,17 +116,20 @@ export class Database {
 
         artist_state[this.DAILY_MODE][this.GAMES_PLAYED]++;
         artist_state[this.DAILY_MODE][this.CURRENT_GAME_STATE] = null;
-        artist_state[this.DAILY_MODE][this.LAST_FIVE_SONGS].push(track);
-        if (artist_state[this.DAILY_MODE][this.LAST_FIVE_SONGS] > 5) {
-            artist_state[this.DAILY_MODE][this.LAST_FIVE_SONGS].shift();
-        }
+        artist_state[this.DAILY_MODE][this.HISTORY].push(track_id);
+        if (artist_state[this.DAILY_MODE][this.HISTORY] > this.cache_size)
+            artist_state[this.DAILY_MODE][this.HISTORY].shift();
+        if (guesses) 
+            artist_state[this.DAILY_MODE][this.GUESS_DIST][guesses]++;
+        artist_state[this.DAILY_MODE][this.LAST_COMPLETED_DATE] = new Date();
 
         if (won) {
             artist_state[this.DAILY_MODE][this.GAMES_WON]++;
-            if (guesses) 
-                artist_state[this.DAILY_MODE][this.GUESS_DIST][guesses]++;
+            
             if (this.isYesterday(artist_state[this.DAILY_MODE][this.LAST_WIN_DATE])) {
                 artist_state[this.DAILY_MODE][this.CURRENT_STREAK]++;
+            } else {
+                artist_state[this.DAILY_MODE][this.CURRENT_STREAK] = 1;
             }
 
             if (artist_state[this.DAILY_MODE][this.CURRENT_STREAK] > artist_state[this.DAILY_MODE][this.MAX_STREAK]) {
@@ -156,6 +156,53 @@ export class Database {
 
         this.db[this.ARTISTS][artist_id] = artist_state;
         this.saveDatabase();
+    }
+
+    getInProgressDailyMode(artist_id) {
+        if (!this.artistExists(artist_id)) {
+            this.createArtist(artist_id);
+            return null;
+        }
+
+        let artist_state = this.getArtistById(artist_id);
+        return artist_state[this.DAILY_MODE][this.CURRENT_GAME_STATE];
+    }
+
+    getDailyModeHistory(artist_id) {
+        if (!this.artistExists(artist_id)) {
+            this.createArtist(artist_id);
+            return [];
+        }
+
+        let artist_state = this.getArtistById(artist_id);
+        return artist_state[this.DAILY_MODE][this.HISTORY];
+    }
+
+    getDailyModeGamesPlayed(artist_id) {
+        if (!this.artistExists(artist_id)) return 0
+        
+        return this.getArtistById(artist_id)[this.DAILY_MODE][this.GAMES_PLAYED];
+    }
+
+    getDailyModeWinPercentage(artist_id) {
+        if (!this.artistExists(artist_id)) return 0
+        
+        const gamesPlayed = this.getArtistById(artist_id)[this.DAILY_MODE][this.GAMES_PLAYED];
+        if (gamesPlayed === 0) return 0
+
+        return (100 * (this.getArtistById(artist_id)[this.DAILY_MODE][this.GAMES_WON] / gamesPlayed)).toFixed(0);
+    }
+
+    getDailyModeCurrentStreak(artist_id) {
+        if (!this.artistExists(artist_id)) return 0
+        
+        return this.getArtistById(artist_id)[this.DAILY_MODE][this.CURRENT_STREAK];
+    }
+
+    getDailyModeLongestStreak(artist_id) {
+        if (!this.artistExists(artist_id)) return 0
+        
+        return this.getArtistById(artist_id)[this.DAILY_MODE][this.MAX_STREAK];
     }
 
     // STREAK MODE
@@ -187,8 +234,12 @@ export class Database {
 
     // PRIVATE METHODS
     isYesterday(date) {
-        if (!(date instanceof Date)) 
-            return false;
+        if (!(date instanceof Date)) {
+            date = new Date(date);
+            if (!date) {
+                return false;
+            }
+        }
         
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
@@ -197,8 +248,12 @@ export class Database {
     }
 
     isToday(date) {
-        if (!(date instanceof Date)) 
-            return false;
+        if (!(date instanceof Date)) {
+            date = new Date(date);
+            if (!date) {
+                return false;
+            }
+        }
         
         const today = new Date();
 
