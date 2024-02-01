@@ -108,33 +108,33 @@ export const catchErrors = fn =>
     });
   };
 
-export const hash = (string) => {
+export const hash = string => {
   let hash = 0;
   if (string.length == 0) return hash;
   for (let i = 0; i < string.length; i++) {
-      let char = string.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
+    let char = string.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash;
   }
   return hash;
-}
+};
 
 export const hashIndex = (artistId, length) => {
   const hashValueCount = 2 ** 31;
   let minBiasedIndex = hashValueCount - (hashValueCount % length);
   for (let i = 0; ; i++) {
-    let hashInput = artistId + ":" + String(i) + ":" + (new Date()).toISOString().substring(0, 10);
+    let hashInput = artistId + ':' + String(i) + ':' + new Date().toISOString().substring(0, 10);
     let hashResult = hash(hashInput);
     if (hashResult > 0 && hashResult < minBiasedIndex) {
       return hashResult % length;
     }
   }
-}
+};
 
 export const getStartOfTomorrrowUTC = () => {
   let tomorrow = new Date();
   tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-  tomorrow.setUTCHours(0,0,0,0);
+  tomorrow.setUTCHours(0, 0, 0, 0);
 
   return tomorrow;
-}
+};

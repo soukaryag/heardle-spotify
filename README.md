@@ -47,6 +47,8 @@
 - [ ] Add schemas, design database structure and collections
 - [ ] Use spotify as primary auth to fetch user data from mongo
 - [ ] Rework frontend to connect to backend endpoints for data flow, tear down cached data
+- [ ] Testing suite for endpoints (WIP, mongo dono walled me lul - need to install monogdb locally)
+
 
 ## Credits
 
